@@ -23,4 +23,22 @@
       <span class="tb-team-score"><%= score %></span>
     </div>
   <% end %>
+
+  <% prediction = @my_predictions && @my_predictions[match.id] %>
+  <% if match.venue.present? || prediction&.advancing_pick.present? %>
+    <div class="tb-card-foot">
+      <span class="tb-card-venue"><%= "📍 #{match.venue}" if match.venue.present? %></span>
+      <% if prediction&.advancing_pick.present? %>
+        <% pick = flag_emoji(prediction.advancing_pick) || prediction.advancing_pick %>
+        <% if match.status == "finished" && match.advancing_team.present? %>
+          <% hit = prediction.correct? %>
+          <span class="tb-card-pick <%= hit ? "tb-card-pick--hit" : "tb-card-pick--miss" %>">
+            <%= pick %> <%= hit ? "✓ +#{prediction.points_awarded}" : "✗" %>
+          </span>
+        <% else %>
+          <span class="tb-card-pick">Tu pick: <%= pick %></span>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
 </div>

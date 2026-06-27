@@ -337,3 +337,19 @@ html.dark {
   color: var(--color-muted-foreground);
   margin-bottom: 6px;
 }
+
+/* Pie de tarjeta del bracket: sede + pick/acierto del usuario */
+.tb-card-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid var(--color-border);
+  font-size: 10px;
+}
+.tb-card-venue { color: var(--color-muted-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-card-pick { flex-shrink: 0; white-space: nowrap; color: var(--color-muted-foreground); }
+.tb-card-pick--hit { color: var(--color-success); font-weight: 700; }
+.tb-card-pick--miss { color: var(--color-destructive); }

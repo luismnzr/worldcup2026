@@ -15,6 +15,7 @@ class BracketController < ApplicationController
     @matches_by_stage = @matches.values.group_by(&:stage)
     @view = params[:view] == "todos" ? "todos" : "rondas"
     @active_stage = default_active_stage
+    @my_predictions = user_signed_in? ? current_user.predictions.index_by(&:match_id) : {}
   end
 
   private
