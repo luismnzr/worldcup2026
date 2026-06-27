@@ -12,6 +12,9 @@ class QuinielaFlowTest < ActionDispatch::IntegrationTest
     get bracket_path
     assert_response :success
 
+    get bracket_path(view: "todos")
+    assert_response :success
+
     get leaderboard_path
     assert_response :success
   end

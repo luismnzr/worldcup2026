@@ -1,0 +1,58 @@
+<div data-controller="tabs"
+     data-tabs-active-class="border-[var(--color-primary)] text-[var(--color-foreground)]"
+     data-tabs-inactive-class="border-transparent text-[var(--color-muted-foreground)]"
+     id="bracket-tabs">
+
+  <%# ── Barra de pestañas (scrollable en móvil) ── %>
+  <div class="border-b border-[var(--color-border)] overflow-x-auto">
+    <nav class="flex gap-0 -mb-px min-w-max" role="tablist">
+      <% BracketController::TAB_STAGES.each do |stage| %>
+        <% active = stage == @active_stage %>
+        <button type="button"
+                class="inline-flex items-center border-b-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors hover:text-[var(--color-foreground)] <%= active ? 'border-[var(--color-primary)] text-[var(--color-foreground)]' : 'border-transparent text-[var(--color-muted-foreground)]' %>"
+                data-action="tabs#select"
+                data-tabs-target="tab"
+                data-tab-id="<%= stage %>"
+                role="tab"
+                aria-selected="<%= active %>">
+          <%= BracketHelper::STAGE_LABELS[stage] %>
+        </button>
+      <% end %>
+    </nav>
+  </div>
+
+  <%# ── Paneles ── %>
+  <div class="pt-5">
+    <% BracketController::TAB_STAGES.each do |stage| %>
+      <% active = stage == @active_stage %>
+      <div id="panel-<%= stage %>" class="tab-panel <%= "hidden" unless active %>" data-tabs-target="panel" role="tabpanel">
+        <% if (dates = bracket_stage_dates(@matches, stage)) %>
+          <p class="text-xs text-[var(--color-muted-foreground)] mb-3"><%= dates %></p>
+        <% end %>
+
+        <% if stage == "final" %>
+          <div class="bracket-grid">
+            <% if @final %>
+              <div>
+                <p class="bracket-grid-label">🏆 Final</p>
+                <%= render "bracket/match", match: @final %>
+              </div>
+            <% end %>
+            <% if @third %>
+              <div>
+                <p class="bracket-grid-label">Tercer lugar</p>
+                <%= render "bracket/match", match: @third %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="bracket-grid">
+            <% (@matches_by_stage[stage] || []).each do |match| %>
+              <%= render "bracket/match", match: match %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

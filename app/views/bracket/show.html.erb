@@ -1,87 +1,27 @@
 <% content_for(:title) { "Bracket" } %>
 
 <%
-  header_cells = [
-    [ "r32", "left" ], [ "r16", "left" ], [ "qf", "left" ], [ "sf", "left" ],
-    [ "final", "center" ],
-    [ "sf", "right" ], [ "qf", "right" ], [ "r16", "right" ], [ "r32", "right" ]
-  ]
+  seg_base = "px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
+  seg_on   = "bg-[var(--color-background)] text-[var(--color-foreground)] shadow-[var(--shadow-sm)]"
+  seg_off  = "text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
 %>
 
 <div class="mx-auto max-w-[1700px] px-3 sm:px-6 py-5 sm:py-8">
-  <div class="flex items-end justify-between mb-4">
+  <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
     <div>
       <h1 class="text-2xl font-bold text-[var(--color-foreground)]">Bracket</h1>
       <p class="text-sm text-[var(--color-muted-foreground)]">Eliminación directa · <%= current_tournament.name %></p>
     </div>
-    <p class="text-xs text-[var(--color-muted-foreground)] hidden sm:block">Desliza horizontalmente para ver todo →</p>
-  </div>
 
-  <div class="tb-scroll">
-    <div class="tb-frame">
-      <%# ── Barra de rondas ── %>
-      <div class="tb-head">
-        <% header_cells.each do |stage, side| %>
-          <div class="tb-head-cell <%= "tb-head-cell--center" if side == "center" %>">
-            <span class="tb-head-label"><%= BracketHelper::STAGE_LABELS[stage] %></span>
-            <% if (dates = bracket_stage_dates(@matches, stage)) %>
-              <span class="tb-head-dates"><%= dates %></span>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-
-      <%# ── Bracket ── %>
-      <div class="tb">
-        <%# Lado izquierdo: R32 → R16 → QF → SF %>
-        <div class="tb-round tb-side-left has-next">
-          <% (@left[:r32] || []).each { |m| %><div class="tb-match"><%= render "bracket/match", match: m %></div><% } %>
-        </div>
-        <div class="tb-round tb-side-left has-next has-prev">
-          <% (@left[:r16] || []).each { |m| %><div class="tb-match"><%= render "bracket/match", match: m %></div><% } %>
-        </div>
-        <div class="tb-round tb-side-left has-next has-prev">
-          <% (@left[:qf] || []).each { |m| %><div class="tb-match"><%= render "bracket/match", match: m %></div><% } %>
-        </div>
-        <div class="tb-round tb-side-left has-prev out-only">
-          <% (@left[:sf] || []).each { |m| %><div class="tb-match"><%= render "bracket/match", match: m %></div><% } %>
-        </div>
-
-        <%# Centro: campeón + final + tercer lugar %>
-        <div class="tb-center">
-          <div class="tb-champion">
-            <p class="tb-champion-eyebrow">🏆 Campeón</p>
-            <p class="tb-champion-name">
-              <%= @final&.advancing_team.presence || "Por definir" %>
-            </p>
-          </div>
-
-          <div class="tb-final-wrap">
-            <% if @final %><%= render "bracket/match", match: @final %><% end %>
-          </div>
-
-          <% if @third %>
-            <div class="tb-third">
-              <p class="tb-third-title">Tercer lugar</p>
-              <%= render "bracket/match", match: @third %>
-            </div>
-          <% end %>
-        </div>
-
-        <%# Lado derecho (espejo): SF → QF → R16 → R32 %>
-        <div class="tb-round tb-side-right has-prev out-only">
-          <% (@right[:sf] || []).each { |m| %><div class="tb-match"><%= render "bracket/match", match: m %></div><% } %>
-        </div>
-        <div class="tb-round tb-side-right has-next has-prev">
-          <% (@right[:qf] || []).each { |m| %><div class="tb-match"><%= render "bracket/match", match: m %></div><% } %>
-        </div>
-        <div class="tb-round tb-side-right has-next has-prev">
-          <% (@right[:r16] || []).each { |m| %><div class="tb-match"><%= render "bracket/match", match: m %></div><% } %>
-        </div>
-        <div class="tb-round tb-side-right has-next">
-          <% (@right[:r32] || []).each { |m| %><div class="tb-match"><%= render "bracket/match", match: m %></div><% } %>
-        </div>
-      </div>
+    <div class="inline-flex items-center gap-0.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-muted)] p-0.5">
+      <%= link_to "Por rondas", bracket_path, class: "#{seg_base} #{@view == "rondas" ? seg_on : seg_off}" %>
+      <%= link_to "Ver todos los partidos", bracket_path(view: "todos"), class: "#{seg_base} #{@view == "todos" ? seg_on : seg_off}" %>
     </div>
   </div>
+
+  <% if @view == "todos" %>
+    <%= render "bracket/tree" %>
+  <% else %>
+    <%= render "bracket/tabs" %>
+  <% end %>
 </div>
