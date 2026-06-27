@@ -9,7 +9,7 @@ class ResultsSyncJob < ApplicationJob
     return unless client.configured?
 
     summary = ResultsSyncService.call(client.world_cup_matches)
-    Rails.logger.info "[ResultsSync] aplicados=#{summary.applied} sin_resolver=#{summary.unresolved.size}"
+    Rails.logger.info "[ResultsSync] con_equipos=#{summary.filled.size} resultados_nuevos=#{summary.applied.size}"
     summary
   rescue FootballDataClient::Error => e
     Rails.logger.warn "[ResultsSync] #{e.message}"

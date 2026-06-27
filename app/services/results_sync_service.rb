@@ -1,70 +1,120 @@
-# Toma el payload de football-data.org y aplica los resultados FINALIZADOS a
-# nuestros Match, reutilizando MatchResultService (puntos + propagación +
-# broadcast). Mapea por el par de equipos (tolerante a inglés/acentos vía
-# CountryFlags). Idempotente y no-destructivo: nunca pisa un partido que el
-# admin ya cerró (override manual gana).
+# Espejea el cuadro de eliminación desde football-data.org hacia nuestros Match.
+#
+# Estrategia: cada partido nuestro guarda el `id` de football-data (external_id).
+# La primera vez se asigna emparejando, por etapa, los fixtures de la API
+# (ordenados por fecha) con nuestros slots (ordenados por número). De ahí en
+# adelante el id es la llave estable. Sincroniza equipos, fecha y marcadores;
+# la sede (venue) se respeta tal cual (la API gratis no la trae). No pisa un
+# partido ya cerrado (override manual / idempotencia).
 class ResultsSyncService
-  Summary = Struct.new(:applied, :skipped, :unresolved, keyword_init: true)
+  Summary = Struct.new(:applied, :filled, :unresolved, keyword_init: true)
+
+  STAGE_MAP = {
+    "LAST_32" => "r32", "LAST_16" => "r16", "QUARTER_FINALS" => "qf",
+    "SEMI_FINALS" => "sf", "THIRD_PLACE" => "third", "FINAL" => "final"
+  }.freeze
+
+  Fixture = Struct.new(:external_id, :stage, :kickoff, :status, :home, :away, :fh, :fa, :winner, keyword_init: true)
 
   class << self
     def call(payload)
-      fixtures = payload.is_a?(Hash) ? payload["matches"] : payload
-      summary = Summary.new(applied: [], skipped: 0, unresolved: [])
-      return summary unless fixtures.is_a?(Array)
+      summary = Summary.new(applied: [], filled: [], unresolved: [])
+      fixtures = parse(payload)
+      return summary if fixtures.empty?
 
-      # Solo partidos con equipos ya conocidos en nuestra DB y sin cerrar.
-      open_matches = Match.where.not(home_team: nil).where.not(away_team: nil)
-                          .where.not(status: "finished").to_a
+      assign_external_ids(fixtures)
 
-      fixtures.each { |fx| process(fx, open_matches, summary) }
+      newly_finished = []
+      fixtures.each do |fx|
+        match = Match.find_by(external_id: fx.external_id)
+        next unless match
+        next if match.status == "finished" # ya cerrado: no se pisa
+
+        changed_to_finished = apply!(match, fx, summary)
+        newly_finished << match if changed_to_finished
+      end
+
+      newly_finished.each { |m| MatchResultService.rescore(m) }
+      LeaderboardService.broadcast(Tournament.current) if newly_finished.any?
       summary
     end
 
     private
 
-    def process(fixture, open_matches, summary)
-      return if fixture["status"] != "FINISHED"
-      return if fixture["stage"] == "GROUP_STAGE"
+    def parse(payload)
+      rows = payload.is_a?(Hash) ? payload["matches"] : payload
+      return [] unless rows.is_a?(Array)
 
-      home = CountryFlags.canonical(fixture.dig("homeTeam", "name"))
-      away = CountryFlags.canonical(fixture.dig("awayTeam", "name"))
-      winner_side = fixture.dig("score", "winner")
+      rows.filter_map do |m|
+        stage = STAGE_MAP[m["stage"]]
+        next unless stage # ignora fase de grupos
 
-      if home.blank? || away.blank?
-        summary.unresolved << [ fixture.dig("homeTeam", "name"), fixture.dig("awayTeam", "name") ]
-        return
-      end
-      return unless %w[HOME_TEAM AWAY_TEAM].include?(winner_side)
-
-      match = find_match(open_matches, home, away)
-      return unless match
-
-      winner_name = winner_side == "HOME_TEAM" ? home : away
-      advancing = same?(match.home_team, winner_name) ? match.home_team : match.away_team
-
-      fh = fixture.dig("score", "fullTime", "home")
-      fa = fixture.dig("score", "fullTime", "away")
-      # Orienta el marcador a nuestro home/away (la API puede traerlo invertido).
-      home_score, away_score = same?(match.home_team, home) ? [ fh, fa ] : [ fa, fh ]
-
-      MatchResultService.record!(match, home_score: home_score, away_score: away_score, advancing_team: advancing)
-      open_matches.delete(match)
-      summary.applied << match.number
-    rescue MatchResultService::InvalidResult => e
-      Rails.logger.warn "[ResultsSync] P#{match&.number}: #{e.message}"
-      summary.skipped += 1
-    end
-
-    # Empareja por el conjunto {local, visitante} sin importar el orden.
-    def find_match(matches, home, away)
-      matches.find do |m|
-        pair = [ CountryFlags.canonical(m.home_team), CountryFlags.canonical(m.away_team) ]
-        pair.include?(home) && pair.include?(away)
+        Fixture.new(
+          external_id: m["id"],
+          stage: stage,
+          kickoff: parse_time(m["utcDate"]),
+          status: map_status(m["status"]),
+          home: resolve_name(m.dig("homeTeam", "name")),
+          away: resolve_name(m.dig("awayTeam", "name")),
+          fh: m.dig("score", "fullTime", "home"),
+          fa: m.dig("score", "fullTime", "away"),
+          winner: m.dig("score", "winner")
+        )
       end
     end
 
-    def same?(team, canonical_name)
-      CountryFlags.canonical(team) == canonical_name
+    # Asigna external_id a nuestros slots la primera vez (por etapa: fixtures por
+    # fecha ↔ nuestros partidos por número).
+    def assign_external_ids(fixtures)
+      fixtures.group_by(&:stage).each do |stage, fxs|
+        pending = fxs.reject { |fx| Match.exists?(external_id: fx.external_id) }
+                     .sort_by { |fx| fx.kickoff || Time.zone.at(0) }
+        slots = Match.where(stage: stage, external_id: nil).order(:number).to_a
+
+        pending.zip(slots).each do |fx, slot|
+          slot&.update_columns(external_id: fx.external_id)
+        end
+      end
+    end
+
+    def apply!(match, fx, summary)
+      match.kickoff_at = fx.kickoff if fx.kickoff
+      match.home_team = fx.home if fx.home.present?
+      match.away_team = fx.away if fx.away.present?
+      match.status = fx.status
+      match.home_score = fx.fh
+      match.away_score = fx.fa
+
+      finishing = false
+      if fx.status == "finished" && %w[HOME_TEAM AWAY_TEAM].include?(fx.winner)
+        match.advancing_team = fx.winner == "HOME_TEAM" ? match.home_team : match.away_team
+        finishing = match.advancing_team.present?
+      end
+
+      match.save!
+      (match.home_team.present? && match.away_team.present?) ? summary.filled << match.number : summary.unresolved << match.number
+      summary.applied << match.number if finishing
+      finishing
+    end
+
+    def resolve_name(raw)
+      return nil if raw.blank?
+
+      CountryFlags.canonical(raw) || raw
+    end
+
+    def map_status(status)
+      case status
+      when "IN_PLAY", "PAUSED" then "live"
+      when "FINISHED" then "finished"
+      else "scheduled"
+      end
+    end
+
+    def parse_time(iso)
+      Time.zone.parse(iso.to_s)
+    rescue ArgumentError, TypeError
+      nil
     end
   end
 end

@@ -1,102 +1,109 @@
 require "test_helper"
 
 class ResultsSyncServiceTest < ActiveSupport::TestCase
-  setup { Tournament.current }
+  include Turbo::Broadcastable::TestHelper
 
-  def fixture(home:, away:, fh:, fa:, winner:, status: "FINISHED", stage: "LAST_16", duration: "REGULAR")
+  setup do
+    @tournament = Tournament.current
+    @tournament.update!(exact_score_bonus: 2)
+  end
+
+  def fx(id:, date:, home:, away:, status: "TIMED", winner: nil, fh: nil, fa: nil, stage: "LAST_32")
     {
-      "status" => status, "stage" => stage,
+      "id" => id, "stage" => stage, "utcDate" => date, "status" => status,
       "homeTeam" => { "name" => home }, "awayTeam" => { "name" => away },
-      "score" => { "winner" => winner, "duration" => duration, "fullTime" => { "home" => fh, "away" => fa } }
+      "score" => { "winner" => winner, "fullTime" => { "home" => fh, "away" => fa } }
     }
   end
 
-  test "applies a finished match using English API names" do
-    match = create(:match, :open, stage: "r16", home_team: "México", away_team: "Argentina")
-    payload = { "matches" => [ fixture(home: "Mexico", away: "Argentina", fh: 2, fa: 1, winner: "HOME_TEAM") ] }
+  test "fills teams and dates by assigning external_ids per stage in date order" do
+    m73 = create(:match, number: 73, stage: "r32", home_team: nil, away_team: nil)
+    m74 = create(:match, number: 74, stage: "r32", home_team: nil, away_team: nil)
 
-    summary = ResultsSyncService.call(payload)
+    payload = { "matches" => [
+      fx(id: 200, date: "2026-06-29T20:00:00Z", home: "Brazil", away: "Japan"),       # más tarde
+      fx(id: 100, date: "2026-06-28T19:00:00Z", home: "South Africa", away: "Canada") # más temprano
+    ] }
+
+    ResultsSyncService.call(payload)
+
+    # El fixture más temprano va al slot de menor número.
+    assert_equal 100, m73.reload.external_id
+    assert_equal "Sudáfrica", m73.home_team
+    assert_equal "Canadá", m73.away_team
+    assert_equal 200, m74.reload.external_id
+    assert_equal "Brasil", m74.home_team
+  end
+
+  test "applies a finished result, sets advancing team and rescores predictions" do
+    match = create(:match, number: 73, stage: "r32", home_team: nil, away_team: nil)
+    user = create(:user)
+
+    # 1ª sync: llega con equipos (programado a futuro) → permite predecir.
+    ResultsSyncService.call({ "matches" => [
+      fx(id: 100, date: 3.days.from_now.utc.iso8601, home: "Mexico", away: "Argentina")
+    ] })
+    prediction = create(:prediction, user: user, match: match.reload, advancing_pick: "México")
+
+    # 2ª sync: el mismo partido ahora finalizó.
+    ResultsSyncService.call({ "matches" => [
+      fx(id: 100, date: 3.days.from_now.utc.iso8601, home: "Mexico", away: "Argentina",
+         status: "FINISHED", winner: "HOME_TEAM", fh: 2, fa: 1)
+    ] })
 
     match.reload
     assert_equal "finished", match.status
-    assert_equal 2, match.home_score
-    assert_equal 1, match.away_score
     assert_equal "México", match.advancing_team
-    assert_equal [ match.number ], summary.applied
+    assert_equal 2, match.home_score
+    assert_equal 1, prediction.reload.points_awarded # r32 = 1
   end
 
-  test "orients the score to our home/away even if the API has them swapped" do
-    match = create(:match, :open, home_team: "México", away_team: "Argentina")
-    # API trae Argentina como local
-    payload = { "matches" => [ fixture(home: "Argentina", away: "Mexico", fh: 3, fa: 0, winner: "HOME_TEAM") ] }
-
-    ResultsSyncService.call(payload)
+  test "orients score and advancing when API has home/away swapped" do
+    match = create(:match, number: 73, stage: "r32", home_team: nil, away_team: nil)
+    ResultsSyncService.call({ "matches" => [
+      fx(id: 100, date: "2026-06-28T19:00:00Z", home: "Argentina", away: "Mexico",
+         status: "FINISHED", winner: "AWAY_TEAM", fh: 0, fa: 3)
+    ] })
 
     match.reload
-    assert_equal 0, match.home_score, "México (nuestro local) anotó 0"
-    assert_equal 3, match.away_score, "Argentina (nuestro visitante) anotó 3"
-    assert_equal "Argentina", match.advancing_team
+    assert_equal "Argentina", match.home_team
+    assert_equal "México", match.away_team
+    assert_equal "México", match.advancing_team
+    assert_equal 3, match.away_score
   end
 
-  test "resolves the advancing team on a penalty shootout via winner" do
-    match = create(:match, :open, home_team: "Brasil", away_team: "Croacia")
-    payload = { "matches" => [ fixture(home: "Brazil", away: "Croatia", fh: 1, fa: 1, winner: "AWAY_TEAM", duration: "PENALTY_SHOOTOUT") ] }
+  test "does not clobber a match already finished" do
+    match = create(:match, :finished, number: 73, stage: "r32", external_id: 100,
+                   home_team: "México", away_team: "Argentina", advancing_team: "México",
+                   home_score: 5, away_score: 0)
 
-    ResultsSyncService.call(payload)
-    assert_equal "Croacia", match.reload.advancing_team
-  end
+    ResultsSyncService.call({ "matches" => [
+      fx(id: 100, date: "2026-06-28T19:00:00Z", home: "Mexico", away: "Argentina",
+         status: "FINISHED", winner: "AWAY_TEAM", fh: 1, fa: 0)
+    ] })
 
-  test "propagates the winner to the next match" do
-    source = create(:match, :open, number: 73, home_team: "México", away_team: "Argentina")
-    dependent = create(:match, number: 90, stage: "r16", home_source_number: 73, home_source_result: "winner",
-                       home_team: nil, away_team: nil)
-    payload = { "matches" => [ fixture(home: "Mexico", away: "Argentina", fh: 2, fa: 1, winner: "HOME_TEAM", stage: "LAST_32") ] }
-
-    ResultsSyncService.call(payload)
-    assert_equal "México", dependent.reload.home_team
-  end
-
-  test "skips group-stage fixtures" do
-    match = create(:match, :open, home_team: "México", away_team: "Argentina")
-    payload = { "matches" => [ fixture(home: "Mexico", away: "Argentina", fh: 2, fa: 1, winner: "HOME_TEAM", stage: "GROUP_STAGE") ] }
-
-    summary = ResultsSyncService.call(payload)
-    assert_empty summary.applied
-    assert_equal "scheduled", match.reload.status
-  end
-
-  test "skips fixtures whose teams are not in our bracket yet" do
-    payload = { "matches" => [ fixture(home: "Spain", away: "Germany", fh: 1, fa: 0, winner: "HOME_TEAM") ] }
-    summary = ResultsSyncService.call(payload)
-    assert_empty summary.applied
-  end
-
-  test "does not clobber a match already finished (manual override wins)" do
-    match = create(:match, :finished, home_team: "México", away_team: "Argentina",
-                   home_score: 5, away_score: 0, advancing_team: "México")
-    payload = { "matches" => [ fixture(home: "Mexico", away: "Argentina", fh: 1, fa: 1, winner: "AWAY_TEAM") ] }
-
-    summary = ResultsSyncService.call(payload)
-    assert_empty summary.applied
     assert_equal 5, match.reload.home_score
     assert_equal "México", match.advancing_team
   end
 
-  test "records unresolved team names" do
-    create(:match, :open, home_team: "México", away_team: "Argentina")
-    payload = { "matches" => [ fixture(home: "Wakanda", away: "Narnia", fh: 1, fa: 0, winner: "HOME_TEAM") ] }
+  test "ignores group-stage fixtures" do
+    create(:match, number: 73, stage: "r32", home_team: nil, away_team: nil)
+    summary = ResultsSyncService.call({ "matches" => [
+      fx(id: 999, date: "2026-06-11T19:00:00Z", home: "Mexico", away: "Brazil", stage: "GROUP_STAGE")
+    ] })
 
-    summary = ResultsSyncService.call(payload)
-    assert_empty summary.applied
-    assert_equal 1, summary.unresolved.size
+    assert_empty summary.filled
+    assert_nil Match.find_by(number: 73).external_id
   end
 
-  test "only finished fixtures are applied" do
-    match = create(:match, :open, home_team: "México", away_team: "Argentina")
-    payload = { "matches" => [ fixture(home: "Mexico", away: "Argentina", fh: 0, fa: 0, winner: nil, status: "IN_PLAY") ] }
+  test "reuses external_id on subsequent syncs without reassigning" do
+    m73 = create(:match, number: 73, stage: "r32", home_team: nil, away_team: nil)
+    payload = { "matches" => [ fx(id: 100, date: "2026-06-28T19:00:00Z", home: "Mexico", away: "Argentina") ] }
 
-    summary = ResultsSyncService.call(payload)
-    assert_empty summary.applied
-    assert_equal "scheduled", match.reload.status
+    ResultsSyncService.call(payload)
+    ResultsSyncService.call(payload)
+
+    assert_equal 100, m73.reload.external_id
+    assert_equal 1, Match.where(external_id: 100).count
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_27_120004) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_27_120005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -130,6 +130,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_27_120004) do
     t.string "status", default: "scheduled", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "external_id"
+    t.index ["external_id"], name: "index_matches_on_external_id", unique: true
     t.index ["kickoff_at"], name: "index_matches_on_kickoff_at"
     t.index ["number"], name: "index_matches_on_number", unique: true
     t.index ["stage"], name: "index_matches_on_stage"

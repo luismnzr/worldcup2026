@@ -14,6 +14,7 @@ class Match < ApplicationRecord
   has_many :predictions, dependent: :destroy
 
   validates :number, presence: true, uniqueness: true
+  validates :external_id, uniqueness: true, allow_nil: true
   validates :stage, presence: true, inclusion: { in: STAGES }
   validates :status, presence: true, inclusion: { in: %w[scheduled live finished] }
 

@@ -16,9 +16,8 @@ module Admin
       end
 
       summary = ResultsSyncService.call(client.world_cup_matches)
-      notice = "Sincronización lista: #{summary.applied.size} resultado(s) aplicado(s)."
-      notice += " #{summary.unresolved.size} sin mapear." if summary.unresolved.any?
-      redirect_to admin_matches_path, notice: notice
+      redirect_to admin_matches_path,
+        notice: "Sincronizado: #{summary.filled.size} partido(s) con equipos, #{summary.applied.size} resultado(s) nuevo(s)."
     rescue FootballDataClient::Error => e
       redirect_to admin_matches_path, alert: "No se pudo sincronizar: #{e.message}"
     end
