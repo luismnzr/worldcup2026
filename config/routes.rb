@@ -84,6 +84,7 @@ Rails.application.routes.draw do
     resources :matches, only: [ :index, :edit, :update ] do
       patch :record_result, on: :member
       post :sync, on: :collection
+      get :reference, on: :collection
     end
     resources :entries, only: [ :index ] do
       patch :toggle_paid, on: :member

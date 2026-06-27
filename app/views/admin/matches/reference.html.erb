@@ -1,0 +1,57 @@
+<% content_for(:page_title) { "Referencia de la API" } %>
+
+<%
+  status_label = ->(s) {
+    case s
+    when "FINISHED" then [ "Finalizado", :success ]
+    when "IN_PLAY", "PAUSED" then [ "En vivo", :warning ]
+    else [ "Programado", :secondary ]
+    end
+  }
+  team_disp = ->(raw) {
+    return content_tag(:span, "Por definir", class: "text-[var(--color-muted-foreground)]") if raw.blank?
+    canon = CountryFlags.canonical(raw)
+    canon ? team_label(canon) : raw
+  }
+%>
+
+<div class="max-w-3xl space-y-6">
+  <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-primary)]/5 p-4 text-sm">
+    <p class="text-[var(--color-foreground)]">
+      Estos son los partidos <strong>reales</strong> según la API. Cópialos a cada slot en
+      <%= link_to "Partidos", admin_matches_path, class: "text-[var(--color-primary)] font-medium hover:underline" %>
+      (la API no sabe qué posición del cuadro es cada uno, por eso se hace a mano una vez).
+      Después, los resultados entran solos.
+    </p>
+  </div>
+
+  <% Match::STAGES.each do |stage| %>
+    <% fixtures = (@reference[stage] || []).sort_by { |f| f[:kickoff] || Time.zone.at(0) } %>
+    <% next unless fixtures.any? %>
+    <section>
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-3"><%= BracketHelper::STAGE_LABELS[stage] %></h2>
+      <div class="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white">
+        <table class="w-full text-sm">
+          <tbody>
+            <% fixtures.each do |f| %>
+              <tr class="border-b border-[var(--color-border)] last:border-0">
+                <td class="px-3 py-2.5 text-xs text-[var(--color-muted-foreground)] whitespace-nowrap">
+                  <%= f[:kickoff]&.strftime("%d/%m · %H:%M") %>
+                </td>
+                <td class="px-3 py-2.5 font-medium text-[var(--color-foreground)]">
+                  <%= team_disp.call(f[:home]) %> <span class="text-[var(--color-muted-foreground)]">vs</span> <%= team_disp.call(f[:away]) %>
+                </td>
+                <td class="px-3 py-2.5 text-right">
+                  <% label, variant = status_label.call(f[:status]) %>
+                  <%= render Ui::BadgeComponent.new(text: label, variant: variant) %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  <% end %>
+
+  <%= link_to "← Volver a Partidos", admin_matches_path, class: "inline-block text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]" %>
+</div>

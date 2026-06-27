@@ -23,6 +23,24 @@ module Admin
       redirect_to admin_matches_path, alert: "No se pudo sincronizar: #{e.message}"
     end
 
+    # Referencia: los partidos REALES de la eliminación según la API, para copiar
+    # los equipos a cada slot a mano (la API no expone la posición del cuadro).
+    API_STAGE_KEYS = {
+      "LAST_32" => "r32", "LAST_16" => "r16", "QUARTER_FINALS" => "qf",
+      "SEMI_FINALS" => "sf", "THIRD_PLACE" => "third", "FINAL" => "final"
+    }.freeze
+
+    def reference
+      client = FootballDataClient.new
+      unless client.configured?
+        redirect_to admin_matches_path, alert: "Configura el token en Ajustes para ver la referencia." and return
+      end
+
+      @reference = build_reference(client.world_cup_matches)
+    rescue FootballDataClient::Error => e
+      redirect_to admin_matches_path, alert: "No se pudo leer la API: #{e.message}"
+    end
+
     def edit
       @match = Match.find(params[:id])
     end
@@ -52,6 +70,30 @@ module Admin
     end
 
     private
+
+    def build_reference(payload)
+      fixtures = payload.is_a?(Hash) ? payload["matches"] : nil
+      return {} unless fixtures.is_a?(Array)
+
+      fixtures.filter_map { |m|
+        key = API_STAGE_KEYS[m["stage"]]
+        next unless key
+
+        {
+          stage: key,
+          kickoff: parse_kickoff(m["utcDate"]),
+          status: m["status"],
+          home: m.dig("homeTeam", "name"),
+          away: m.dig("awayTeam", "name")
+        }
+      }.group_by { |h| h[:stage] }
+    end
+
+    def parse_kickoff(iso)
+      Time.zone.parse(iso.to_s)
+    rescue ArgumentError, TypeError
+      nil
+    end
 
     def match_params
       params.require(:match).permit(:home_team, :away_team, :home_label, :away_label,

@@ -15,7 +15,7 @@ module CountryFlags
     "Serbia" => "🇷🇸", "Noruega" => "🇳🇴", "Austria" => "🇦🇹", "Turquía" => "🇹🇷",
     "Ucrania" => "🇺🇦", "Suecia" => "🇸🇪", "Escocia" => "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "Gales" => "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
     "Hungría" => "🇭🇺", "Chequia" => "🇨🇿", "Eslovenia" => "🇸🇮", "Eslovaquia" => "🇸🇰",
-    "Grecia" => "🇬🇷", "Rumania" => "🇷🇴", "Irlanda" => "🇮🇪",
+    "Grecia" => "🇬🇷", "Rumania" => "🇷🇴", "Irlanda" => "🇮🇪", "Bosnia y Herzegovina" => "🇧🇦",
     # África
     "Senegal" => "🇸🇳", "Marruecos" => "🇲🇦", "Ghana" => "🇬🇭", "Camerún" => "🇨🇲",
     "Egipto" => "🇪🇬", "Nigeria" => "🇳🇬", "Argelia" => "🇩🇿", "Túnez" => "🇹🇳",
@@ -58,7 +58,8 @@ module CountryFlags
     "costa rica" => "Costa Rica", "panama" => "Panamá", "jamaica" => "Jamaica", "honduras" => "Honduras",
     "haiti" => "Haití", "curacao" => "Curazao", "peru" => "Perú", "bolivia" => "Bolivia",
     "venezuela" => "Venezuela", "paraguay" => "Paraguay", "chile" => "Chile", "colombia" => "Colombia",
-    "ecuador" => "Ecuador", "uruguay" => "Uruguay", "argentina" => "Argentina"
+    "ecuador" => "Ecuador", "uruguay" => "Uruguay", "argentina" => "Argentina",
+    "bosnia-herzegovina" => "Bosnia y Herzegovina", "bosnia and herzegovina" => "Bosnia y Herzegovina"
   }.freeze
 
   NAMES = FLAGS.keys.sort.freeze

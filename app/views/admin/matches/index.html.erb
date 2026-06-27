@@ -5,8 +5,12 @@
     Captura equipos y resultados. La sincronización automática aplica los resultados finales; tú puedes corregir cualquiera a mano.
   </p>
   <% if @sync_enabled %>
-    <%= button_to "Sincronizar ahora", sync_admin_matches_path, method: :post,
-          class: "flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+    <div class="flex-shrink-0 flex items-center gap-2">
+      <%= link_to "Referencia API", reference_admin_matches_path,
+            class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-muted)] transition-colors" %>
+      <%= button_to "Sincronizar ahora", sync_admin_matches_path, method: :post,
+            class: "inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+    </div>
   <% else %>
     <span class="flex-shrink-0 text-xs text-[var(--color-muted-foreground)]">Sync API: configura <code class="font-mono">FOOTBALL_DATA_API_TOKEN</code></span>
   <% end %>
