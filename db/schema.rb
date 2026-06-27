@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_30_020000) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_27_120004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -65,6 +65,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_30_020000) do
     t.index ["read_at"], name: "index_admin_notifications_on_read_at"
   end
 
+  create_table "entries", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "tournament_id", null: false
+    t.integer "status", default: 0, null: false
+    t.decimal "amount", precision: 10, scale: 2
+    t.string "stripe_checkout_session_id"
+    t.datetime "paid_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["stripe_checkout_session_id"], name: "index_entries_on_stripe_checkout_session_id", unique: true
+    t.index ["tournament_id"], name: "index_entries_on_tournament_id"
+    t.index ["user_id", "tournament_id"], name: "index_entries_on_user_id_and_tournament_id", unique: true
+    t.index ["user_id"], name: "index_entries_on_user_id"
+  end
+
   create_table "event_registrations", force: :cascade do |t|
     t.bigint "event_id", null: false
     t.bigint "user_id", null: false
@@ -94,6 +109,30 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_30_020000) do
     t.boolean "in_person_payment_only", default: false, null: false
     t.index ["date"], name: "index_events_on_date"
     t.index ["published"], name: "index_events_on_published"
+  end
+
+  create_table "matches", force: :cascade do |t|
+    t.integer "number", null: false
+    t.string "stage", null: false
+    t.string "home_label"
+    t.string "away_label"
+    t.integer "home_source_number"
+    t.integer "away_source_number"
+    t.string "home_source_result"
+    t.string "away_source_result"
+    t.string "home_team"
+    t.string "away_team"
+    t.integer "home_score"
+    t.integer "away_score"
+    t.string "advancing_team"
+    t.datetime "kickoff_at"
+    t.string "venue"
+    t.string "status", default: "scheduled", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["kickoff_at"], name: "index_matches_on_kickoff_at"
+    t.index ["number"], name: "index_matches_on_number", unique: true
+    t.index ["stage"], name: "index_matches_on_stage"
   end
 
   create_table "member_posts", force: :cascade do |t|
@@ -181,6 +220,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_30_020000) do
     t.index ["user_id"], name: "index_payments_on_user_id"
   end
 
+  create_table "predictions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "match_id", null: false
+    t.string "advancing_pick"
+    t.integer "home_score"
+    t.integer "away_score"
+    t.integer "points_awarded", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["match_id"], name: "index_predictions_on_match_id"
+    t.index ["user_id", "match_id"], name: "index_predictions_on_user_id_and_match_id", unique: true
+    t.index ["user_id"], name: "index_predictions_on_user_id"
+  end
+
   create_table "products", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -254,6 +307,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_30_020000) do
     t.index ["stripe_price_id"], name: "index_subscription_plans_on_stripe_price_id", unique: true
   end
 
+  create_table "tournaments", force: :cascade do |t|
+    t.string "name", default: "FIFA World Cup 2026", null: false
+    t.decimal "entry_fee", precision: 10, scale: 2, default: "50.0", null: false
+    t.string "currency", default: "MXN", null: false
+    t.text "prize_description"
+    t.integer "exact_score_bonus", default: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "user_subscriptions", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "subscription_plan_id", null: false
@@ -286,6 +349,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_30_020000) do
     t.string "stripe_customer_id"
     t.text "notes"
     t.boolean "featured", default: false, null: false
+    t.string "display_name"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
@@ -294,6 +358,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_30_020000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "entries", "tournaments"
+  add_foreign_key "entries", "users"
   add_foreign_key "event_registrations", "events"
   add_foreign_key "event_registrations", "users"
   add_foreign_key "order_items", "orders"
@@ -301,6 +367,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_30_020000) do
   add_foreign_key "orders", "promotion_codes"
   add_foreign_key "orders", "users"
   add_foreign_key "payments", "users"
+  add_foreign_key "predictions", "matches"
+  add_foreign_key "predictions", "users"
   add_foreign_key "user_subscriptions", "subscription_plans"
   add_foreign_key "user_subscriptions", "users"
 end

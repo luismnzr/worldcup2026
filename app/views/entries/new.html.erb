@@ -1,0 +1,32 @@
+<% content_for(:title) { "Inscripción" } %>
+
+<div class="mx-auto max-w-md px-4 sm:px-6 py-10">
+  <%= render Ui::CardComponent.new do %>
+    <div class="text-center">
+      <p class="text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">Inscripción</p>
+      <h1 class="mt-2 text-2xl font-bold text-[var(--color-foreground)]"><%= current_tournament.name %></h1>
+      <p class="mt-2 text-sm text-[var(--color-muted-foreground)]">
+        Un cargo único de acceso al torneo. Desbloquea tus predicciones y tu lugar en la tabla.
+      </p>
+
+      <div class="my-6">
+        <span class="text-4xl font-bold text-[var(--color-foreground)]">
+          <%= number_to_currency(current_tournament.entry_fee, unit: "$", precision: 0) %>
+        </span>
+        <span class="text-sm text-[var(--color-muted-foreground)]"><%= current_tournament.currency %></span>
+      </div>
+
+      <ul class="text-left text-sm text-[var(--color-muted-foreground)] space-y-2 mb-6">
+        <li class="flex gap-2"><span class="text-[var(--color-success)]">✓</span> Predicciones en todos los partidos de eliminación</li>
+        <li class="flex gap-2"><span class="text-[var(--color-success)]">✓</span> Bonus por marcador exacto (+<%= current_tournament.exact_score_bonus %>)</li>
+        <li class="flex gap-2"><span class="text-[var(--color-success)]">✓</span> Tabla de posiciones en vivo</li>
+      </ul>
+
+      <%= button_to "Pagar inscripción", entries_path, method: :post, class: "w-full inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+
+      <p class="mt-4 text-xs text-[var(--color-muted-foreground)]">
+        Pago seguro con Stripe. El cargo es por el acceso al torneo, no por un premio en efectivo.
+      </p>
+    </div>
+  <% end %>
+</div>

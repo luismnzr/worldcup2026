@@ -15,10 +15,21 @@ Rails.application.routes.draw do
     password: "password"
   }
 
-  # Static pages
-  root "pages#home"
+  # Quiniela Mundial 2026
+  root "pool#home"
   get "about", to: "pages#about"
   get "terms", to: "pages#terms"
+
+  get "bracket", to: "bracket#show", as: :bracket
+  get "tabla", to: "leaderboard#index", as: :leaderboard
+
+  get "predicciones", to: "predictions#index", as: :predictions
+  post "predicciones/:match_id", to: "predictions#upsert", as: :prediction
+
+  # Inscripción (acceso al torneo) — cobro único vía Stripe
+  get  "inscripcion", to: "entries#new", as: :new_entry
+  post "inscripcion", to: "entries#create", as: :entries
+  get  "inscripcion/exito", to: "entries#success", as: :entry_success
 
   # Shop
   resources :products, only: [ :index, :show ], path: "tienda"
@@ -68,6 +79,16 @@ Rails.application.routes.draw do
     resources :products, except: [ :show ]
     resources :orders, only: [ :index, :show, :new, :create, :update ]
     resources :member_posts
+
+    # Quiniela
+    resources :matches, only: [ :index, :edit, :update ] do
+      patch :record_result, on: :member
+    end
+    resources :entries, only: [ :index ] do
+      patch :toggle_paid, on: :member
+    end
+    resource :tournament, only: [ :edit, :update ], controller: "tournament"
+
     get "settings", to: "settings#show"
     patch "settings", to: "settings#update"
     get "reports", to: "reports#index"

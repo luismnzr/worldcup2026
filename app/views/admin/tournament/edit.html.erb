@@ -1,0 +1,39 @@
+<% content_for(:page_title) { "Configuración del torneo" } %>
+
+<div class="max-w-xl">
+  <%= form_with model: @tournament, url: admin_tournament_path, method: :patch, class: "space-y-5" do |f| %>
+    <% if @tournament.errors.any? %>
+      <div class="p-4 rounded-lg bg-red-50 text-red-700 text-sm">
+        <ul class="list-disc pl-5 space-y-1"><% @tournament.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %></ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :name, "Nombre del torneo", class: "block text-sm font-medium mb-1" %>
+      <%= f.text_field :name, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <%= f.label :entry_fee, "Inscripción", class: "block text-sm font-medium mb-1" %>
+        <%= f.number_field :entry_fee, step: 0.01, min: 0, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      </div>
+      <div>
+        <%= f.label :currency, "Moneda", class: "block text-sm font-medium mb-1" %>
+        <%= f.text_field :currency, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm uppercase focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      </div>
+      <div>
+        <%= f.label :exact_score_bonus, "Bonus marcador", class: "block text-sm font-medium mb-1" %>
+        <%= f.number_field :exact_score_bonus, min: 0, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      </div>
+    </div>
+
+    <div>
+      <%= f.label :prize_description, "Premio (simbólico)", class: "block text-sm font-medium mb-1" %>
+      <%= f.text_area :prize_description, rows: 3, placeholder: "Trofeo de campeón; el último lugar paga los tacos.", class: "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      <p class="text-xs text-[var(--color-muted-foreground)] mt-1">Solo texto. No se muestran montos de dinero como premio.</p>
+    </div>
+
+    <%= f.submit "Guardar", class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+  <% end %>
+</div>

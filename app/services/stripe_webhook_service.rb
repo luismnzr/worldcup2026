@@ -37,7 +37,37 @@ class StripeWebhookService
         fulfill_subscription(session, metadata)
       when "product"
         fulfill_product(session, metadata)
+      when "entry"
+        fulfill_entry(session, metadata)
       end
+    end
+
+    # Inscripción a la quiniela: marca el Entry como paid (esto desbloquea
+    # predicciones y leaderboard) y registra el Payment. Idempotente.
+    def fulfill_entry(session, metadata)
+      return if Payment.exists?(stripe_checkout_session_id: session.id)
+
+      entry = Entry.find(metadata["entry_id"])
+      currency = session.currency.presence || entry.tournament.currency
+      amount = session.amount_total ? cents_to_decimal(session.amount_total) : entry.tournament.entry_fee
+
+      ActiveRecord::Base.transaction do
+        entry.mark_paid!(checkout_session_id: session.id, amount: amount)
+
+        Payment.create!(
+          user: entry.user,
+          stripe_checkout_session_id: session.id,
+          stripe_payment_intent_id: session.payment_intent,
+          amount: amount,
+          currency: currency,
+          status: "succeeded",
+          payment_method: "stripe",
+          description: "Inscripción — #{entry.tournament.name}",
+          payable: entry
+        )
+      end
+
+      LeaderboardService.broadcast(entry.tournament)
     end
 
     def fulfill_subscription(session, metadata)

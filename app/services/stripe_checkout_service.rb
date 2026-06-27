@@ -68,6 +68,37 @@ class StripeCheckoutService
       Stripe::Checkout::Session.create(session_params)
     end
 
+    # Inscripción al torneo — cargo único por ACCESO/servicio (no es un boleto a
+    # un bote de premios). Marca el Entry como paid vía webhook.
+    def create_entry_session(user:, tournament:, entry:, success_url:, cancel_url:)
+      customer_id = StripeCustomerService.find_or_create(user)
+      currency = tournament.currency.downcase
+
+      Stripe::Checkout::Session.create(
+        customer: customer_id,
+        mode: "payment",
+        line_items: [ {
+          price_data: {
+            currency: currency,
+            unit_amount: cents(tournament.entry_fee),
+            product_data: {
+              name: "Inscripción — #{tournament.name}",
+              description: "Acceso al torneo de predicciones."
+            }
+          },
+          quantity: 1
+        } ],
+        metadata: {
+          type: "entry",
+          entry_id: entry.id,
+          tournament_id: tournament.id,
+          user_id: user.id
+        },
+        success_url: success_url,
+        cancel_url: cancel_url
+      )
+    end
+
     def create_portal_session(user:, return_url:)
       raise "User has no Stripe customer ID" if user.stripe_customer_id.blank?
 

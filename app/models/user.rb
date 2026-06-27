@@ -10,6 +10,8 @@ class User < ApplicationRecord
   has_many :payments, dependent: :destroy
   has_many :orders, dependent: :nullify
   has_many :event_registrations, dependent: :destroy
+  has_many :entries, dependent: :destroy
+  has_many :predictions, dependent: :destroy
 
   has_one_attached :photo
 
@@ -29,6 +31,19 @@ class User < ApplicationRecord
 
   def full_name
     "#{first_name} #{last_name}"
+  end
+
+  # Nombre visible en leaderboard/quiniela. Cae al primer nombre si no se eligió.
+  def display_name_or_default
+    display_name.presence || first_name.presence || email.split("@").first
+  end
+
+  def entry_for(tournament)
+    entries.find_by(tournament: tournament)
+  end
+
+  def paid_entry?(tournament)
+    entry_for(tournament)&.paid?
   end
 
   def active_subscription

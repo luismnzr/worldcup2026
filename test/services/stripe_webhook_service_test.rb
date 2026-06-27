@@ -165,6 +165,59 @@ class StripeWebhookServiceTest < ActiveSupport::TestCase
     end
   end
 
+  test "fulfill_entry marks the entry paid and records a payment" do
+    tournament = Tournament.current
+    entry = create(:entry, user: @user, tournament: tournament, status: :pending, amount: 50)
+
+    session = OpenStruct.new(
+      id: "cs_test_entry_1",
+      payment_intent: "pi_entry_1",
+      currency: "mxn",
+      amount_total: 5000,
+      metadata: {
+        "type" => "entry",
+        "entry_id" => entry.id.to_s,
+        "tournament_id" => tournament.id.to_s,
+        "user_id" => @user.id.to_s
+      }
+    )
+
+    event = OpenStruct.new(
+      id: "evt_#{SecureRandom.hex(8)}",
+      type: "checkout.session.completed",
+      data: OpenStruct.new(object: session)
+    )
+
+    assert_difference -> { Payment.count } => 1 do
+      StripeWebhookService.process(event)
+    end
+
+    entry.reload
+    assert entry.paid?
+    assert_not_nil entry.paid_at
+    assert_equal "cs_test_entry_1", entry.stripe_checkout_session_id
+    assert_equal 50.to_d, entry.amount
+  end
+
+  test "fulfill_entry is idempotent for the same checkout session" do
+    tournament = Tournament.current
+    entry = create(:entry, user: @user, tournament: tournament, status: :pending, amount: 50)
+
+    session = OpenStruct.new(
+      id: "cs_dup_entry",
+      payment_intent: "pi_dup_entry",
+      currency: "mxn",
+      amount_total: 5000,
+      metadata: { "type" => "entry", "entry_id" => entry.id.to_s, "tournament_id" => tournament.id.to_s, "user_id" => @user.id.to_s }
+    )
+
+    StripeWebhookService.process(OpenStruct.new(id: "evt_#{SecureRandom.hex(8)}", type: "checkout.session.completed", data: OpenStruct.new(object: session)))
+
+    assert_no_difference -> { Payment.count } do
+      StripeWebhookService.process(OpenStruct.new(id: "evt_#{SecureRandom.hex(8)}", type: "checkout.session.completed", data: OpenStruct.new(object: session)))
+    end
+  end
+
   test "handle_invoice_payment_failed marks subscription as past_due" do
     user_sub = create(:user_subscription, user: @user, subscription_plan: @plan,
                       stripe_subscription_id: "sub_pastdue", status: "active")

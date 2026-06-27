@@ -48,6 +48,12 @@
         </div>
         <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
           <%= admin_nav_link "Panel", admin_dashboard_path, "dashboard" %>
+          <div class="pt-4 mt-4 border-t border-[var(--color-border)]">
+            <p class="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]/60">Quiniela</p>
+            <%= admin_nav_link "Partidos", admin_matches_path, "events" %>
+            <%= admin_nav_link "Inscripciones", admin_entries_path, "orders" %>
+            <%= admin_nav_link "Torneo", edit_admin_tournament_path, "settings" %>
+          </div>
           <%= admin_nav_link "Usuarios", admin_users_path, "users" %>
           <%= admin_nav_link "Eventos", admin_events_path, "events" %>
           <%= admin_nav_link "Suscripciones", admin_subscription_plans_path, "subscriptions" %>

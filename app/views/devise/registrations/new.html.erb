@@ -12,8 +12,8 @@
         </div>
         <span class="text-2xl font-bold text-white"><%= StudioSetting.get("studio_name") %></span>
       </div>
-      <h2 class="text-3xl font-bold text-white">Comienza tu<br>camino de bienestar</h2>
-      <p class="mt-4 text-white/70 max-w-sm">Crea una cuenta para explorar clases, reservar sesiones y unirte a nuestra comunidad.</p>
+      <h2 class="text-3xl font-bold text-white">Arma tu quiniela<br>del Mundial 2026</h2>
+      <p class="mt-4 text-white/70 max-w-sm">Crea tu cuenta, inscríbete al torneo y compite contra tus amigos partido a partido.</p>
       <div class="mt-12 flex items-center gap-4">
         <div class="flex -space-x-2">
           <div class="h-8 w-8 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-xs font-medium text-white">A</div>
@@ -56,6 +56,11 @@
               <label for="user_last_name" class="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">Apellido</label>
               <%= f.text_field :last_name, placeholder: "Doe", required: true, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] bg-white text-sm placeholder:text-[var(--color-muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition" %>
             </div>
+          </div>
+
+          <div>
+            <label for="user_display_name" class="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">Apodo <span class="text-[var(--color-muted-foreground)] font-normal">(opcional, sale en la tabla)</span></label>
+            <%= f.text_field :display_name, placeholder: "El Crack", class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] bg-white text-sm placeholder:text-[var(--color-muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition" %>
           </div>
 
           <div>

@@ -1,0 +1,72 @@
+<% content_for(:page_title) { "Partido P#{@match.number}" } %>
+
+<div class="max-w-2xl space-y-8">
+  <%# 1) Datos del partido (equipos, kickoff, sede) %>
+  <section>
+    <h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-3">Datos del partido</h2>
+    <%= form_with model: [ :admin, @match ], class: "space-y-5" do |f| %>
+      <% if @match.errors.any? %>
+        <div class="p-4 rounded-lg bg-red-50 text-red-700 text-sm">
+          <ul class="list-disc pl-5 space-y-1"><% @match.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %></ul>
+        </div>
+      <% end %>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :home_team, "Equipo local", class: "block text-sm font-medium mb-1" %>
+          <%= f.text_field :home_team, placeholder: @match.home_label, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+        <div>
+          <%= f.label :away_team, "Equipo visitante", class: "block text-sm font-medium mb-1" %>
+          <%= f.text_field :away_team, placeholder: @match.away_label, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :kickoff_at, "Kickoff (UTC)", class: "block text-sm font-medium mb-1" %>
+          <%= f.datetime_field :kickoff_at, value: @match.kickoff_at&.strftime("%Y-%m-%dT%H:%M"), class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+        <div>
+          <%= f.label :venue, "Sede", class: "block text-sm font-medium mb-1" %>
+          <%= f.text_field :venue, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+      </div>
+
+      <%= f.submit "Guardar datos", class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+    <% end %>
+  </section>
+
+  <%# 2) Captura de resultado (scoring + propagación) %>
+  <section class="pt-6 border-t border-[var(--color-border)]">
+    <h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-3">Capturar resultado</h2>
+    <% if @match.teams_known? %>
+      <%= form_with url: record_result_admin_match_path(@match), method: :patch, class: "space-y-4" do %>
+        <div class="flex items-end gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1"><%= @match.home_team %></label>
+            <%= number_field_tag "match[home_score]", @match.home_score, min: 0, class: "w-20 h-10 px-3 text-center rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+          </div>
+          <span class="pb-2 text-[var(--color-muted-foreground)]">–</span>
+          <div>
+            <label class="block text-sm font-medium mb-1"><%= @match.away_team %></label>
+            <%= number_field_tag "match[away_score]", @match.away_score, min: 0, class: "w-20 h-10 px-3 text-center rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">¿Quién avanza? <span class="text-xs text-[var(--color-muted-foreground)]">(resuelve penales)</span></label>
+          <%= select_tag "match[advancing_team]",
+                options_for_select([ @match.home_team, @match.away_team ], @match.advancing_team),
+                include_blank: "Selecciona…",
+                class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+        <p class="text-xs text-[var(--color-muted-foreground)]">Al guardar se recalculan los puntos y se propaga el ganador al siguiente partido.</p>
+        <%= submit_tag "Guardar resultado", class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-success)] rounded-lg hover:opacity-90 transition-colors cursor-pointer" %>
+      <% end %>
+    <% else %>
+      <p class="text-sm text-[var(--color-muted-foreground)]">Primero captura los dos equipos arriba para poder registrar el resultado.</p>
+    <% end %>
+  </section>
+
+  <%= link_to "← Volver a partidos", admin_matches_path, class: "inline-block text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]" %>
+</div>

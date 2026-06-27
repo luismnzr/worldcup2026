@@ -1,0 +1,39 @@
+<div id="match_<%= match.id %>" class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 shadow-[var(--shadow-sm)]">
+  <div class="flex items-center justify-between mb-3">
+    <%= render Ui::BadgeComponent.new(text: match.stage_name, variant: :secondary) %>
+    <span class="text-xs text-[var(--color-muted-foreground)]">
+      Cierra <%= match.kickoff_at.in_time_zone(StudioSetting.studio_timezone).strftime("%d/%m %H:%M") %>
+    </span>
+  </div>
+
+  <%= form_with url: prediction_path(match), method: :post, class: "space-y-3" do |f| %>
+    <p class="text-xs font-medium text-[var(--color-muted-foreground)]">¿Quién avanza?</p>
+    <div class="grid grid-cols-2 gap-2">
+      <% [ match.home_team, match.away_team ].each do |team| %>
+        <label class="flex items-center justify-center gap-2 cursor-pointer rounded-[var(--radius-md)] border px-3 py-2.5 text-sm font-medium transition-colors
+                      <%= prediction.advancing_pick == team ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]' : 'border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-secondary)]' %>">
+          <%= radio_button_tag "prediction[advancing_pick]", team, prediction.advancing_pick == team, class: "sr-only", id: "pick_#{match.id}_#{team.parameterize}" %>
+          <%= team %>
+        </label>
+      <% end %>
+    </div>
+
+    <details class="text-sm" <%= "open" if prediction.predicted_score? %>>
+      <summary class="cursor-pointer text-xs text-[var(--color-muted-foreground)] select-none">Marcador exacto (bonus +<%= current_tournament.exact_score_bonus %>)</summary>
+      <div class="flex items-center gap-2 mt-2">
+        <%= number_field_tag "prediction[home_score]", prediction.home_score, min: 0, placeholder: match.home_team, class: "w-16 h-10 px-2 text-center rounded-lg border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        <span class="text-[var(--color-muted-foreground)]">–</span>
+        <%= number_field_tag "prediction[away_score]", prediction.away_score, min: 0, placeholder: match.away_team, class: "w-16 h-10 px-2 text-center rounded-lg border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      </div>
+    </details>
+
+    <div class="flex items-center justify-between">
+      <% if prediction.persisted? %>
+        <span class="text-xs text-[var(--color-success)]">✓ Guardada</span>
+      <% else %>
+        <span></span>
+      <% end %>
+      <%= f.submit "Guardar", class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+    </div>
+  <% end %>
+</div>
