@@ -1,0 +1,26 @@
+<%#
+  Tarjeta de partido para el bracket. locals: match, (opcional) compact
+%>
+<div class="tb-card">
+  <div class="tb-card-top">
+    <span class="tb-card-status">
+      <% if match.status == "finished" %>
+        <%= match.home_score == match.away_score ? "PEN" : "FT" %>
+      <% elsif match.kickoff_at.present? %>
+        <%= match.kickoff_at.in_time_zone(StudioSetting.studio_timezone).strftime("%d/%m · %H:%M") %>
+      <% else %>
+        —
+      <% end %>
+    </span>
+    <span class="tb-card-num">P<%= match.number %></span>
+  </div>
+
+  <% [ [ match.display_home, match.home_team, match.home_score ],
+       [ match.display_away, match.away_team, match.away_score ] ].each do |label, team, score| %>
+    <% advanced = team.present? && match.advancing_team == team %>
+    <div class="tb-team <%= "tb-team--win" if advanced %>">
+      <span class="tb-team-name" title="<%= label %>"><%= label %></span>
+      <span class="tb-team-score"><%= score %></span>
+    </div>
+  <% end %>
+</div>

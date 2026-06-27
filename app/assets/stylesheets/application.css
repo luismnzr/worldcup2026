@@ -181,3 +181,140 @@ html.dark {
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M9 5l7 7-7 7'/%3E%3C/svg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M9 5l7 7-7 7'/%3E%3C/svg%3E");
 }
+
+/* ── Tournament bracket (/bracket) ────────────────────────────────────────── */
+.tb-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.tb-frame { min-width: 1640px; }
+
+/* Round-label header bar */
+.tb-head {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 16px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.tb-head-cell {
+  flex: 0 0 176px;
+  width: 176px;
+  padding: 9px 10px;
+  text-align: center;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  border-right: 1px solid color-mix(in srgb, var(--color-primary-foreground) 16%, transparent);
+}
+.tb-head-cell:last-child { border-right: 0; }
+.tb-head-cell--center { flex: 0 0 220px; width: 220px; }
+.tb-head-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.tb-head-dates { display: block; font-size: 10px; opacity: 0.8; margin-top: 2px; }
+
+/* Bracket grid */
+.tb {
+  display: flex;
+  align-items: stretch;
+  min-height: 640px;
+  --g: 22px;
+  --line: var(--color-border);
+}
+.tb-round { flex: 0 0 176px; width: 176px; display: flex; flex-direction: column; }
+.tb-match { position: relative; flex: 1 1 0; display: flex; align-items: center; }
+.tb-side-left .tb-match { justify-content: flex-start; }
+.tb-side-right .tb-match { justify-content: flex-end; }
+
+/* Match card */
+.tb-card {
+  position: relative;
+  z-index: 1;
+  width: calc(100% - var(--g));
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 6px 9px;
+  font-size: 12px;
+}
+.tb-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.tb-card-status { font-size: 10px; font-weight: 600; color: var(--color-muted-foreground); }
+.tb-card-num { font-size: 10px; color: var(--color-muted-foreground); }
+.tb-team { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 2px 0; }
+.tb-team + .tb-team { border-top: 1px solid var(--color-border); }
+.tb-team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--color-foreground); }
+.tb-team-score { font-variant-numeric: tabular-nums; color: var(--color-muted-foreground); min-width: 12px; text-align: right; }
+.tb-team--win .tb-team-name,
+.tb-team--win .tb-team-score { font-weight: 700; color: var(--color-primary); }
+
+/* ── Connectors ──
+   Each card draws short horizontal stubs; odd matches draw the vertical "bus"
+   that joins a pair. flex:1 on equal-height columns aligns parents to the
+   midpoint of their two feeders automatically. */
+
+/* LEFT side: out toward center (right), in from outer (left) */
+.tb-side-left.has-next .tb-card::after,
+.tb-side-left.out-only .tb-card::after {
+  content: ""; position: absolute; top: 50%; left: 100%;
+  width: var(--g); height: 2px; background: var(--line); transform: translateY(-50%);
+}
+.tb-side-left.has-next .tb-match:nth-child(odd)::after {
+  content: ""; position: absolute; right: 0; top: 50%;
+  width: 2px; height: 100%; background: var(--line);
+}
+.tb-side-left.has-prev .tb-card::before {
+  content: ""; position: absolute; top: 50%; right: 100%;
+  width: var(--g); height: 2px; background: var(--line); transform: translateY(-50%);
+}
+
+/* RIGHT side: mirror — out toward center (left), in from outer (right) */
+.tb-side-right.has-next .tb-card::after,
+.tb-side-right.out-only .tb-card::after {
+  content: ""; position: absolute; top: 50%; right: 100%;
+  width: var(--g); height: 2px; background: var(--line); transform: translateY(-50%);
+}
+.tb-side-right.has-next .tb-match:nth-child(odd)::after {
+  content: ""; position: absolute; left: 0; top: 50%;
+  width: 2px; height: 100%; background: var(--line);
+}
+.tb-side-right.has-prev .tb-card::before {
+  content: ""; position: absolute; top: 50%; left: 100%;
+  width: var(--g); height: 2px; background: var(--line); transform: translateY(-50%);
+}
+
+/* Center column: champion, final, third place */
+.tb-center {
+  flex: 0 0 220px; width: 220px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px;
+}
+.tb-final-wrap { position: relative; width: 100%; display: flex; justify-content: center; }
+.tb-final-wrap::before {
+  content: ""; position: absolute; top: 50%; left: 0; width: 100%; height: 2px;
+  background: var(--line); transform: translateY(-50%); z-index: 0;
+}
+.tb-final-wrap .tb-card { width: 160px; }
+
+.tb-champion {
+  width: 100%;
+  text-align: center;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  border-radius: var(--radius-md);
+  padding: 12px 10px;
+  box-shadow: var(--shadow-md);
+}
+.tb-champion-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; }
+.tb-champion-name { font-size: 16px; font-weight: 800; margin-top: 2px; }
+
+.tb-third { width: 100%; text-align: center; }
+.tb-third-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-muted-foreground); margin-bottom: 6px; }
+.tb-third .tb-card { width: 160px; margin: 0 auto; }
