@@ -5,6 +5,18 @@ redis_config = {
 
 Sidekiq.configure_server do |config|
   config.redis = redis_config
+
+  # Sincroniza resultados del Mundial cada 10 min — solo si hay API key y
+  # sidekiq-cron disponible. La captura manual en admin sigue siendo el override.
+  config.on(:startup) do
+    if defined?(Sidekiq::Cron::Job) && ENV["FOOTBALL_DATA_API_TOKEN"].present?
+      Sidekiq::Cron::Job.create(
+        name: "Resultados Mundial — cada 10 min",
+        cron: "*/10 * * * *",
+        class: "ResultsSyncJob"
+      )
+    end
+  end
 end
 
 Sidekiq.configure_client do |config|

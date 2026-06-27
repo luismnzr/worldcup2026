@@ -1,5 +1,17 @@
 <% content_for(:page_title) { "Partidos" } %>
 
+<div class="flex items-center justify-between mb-5 gap-3">
+  <p class="text-sm text-[var(--color-muted-foreground)]">
+    Captura equipos y resultados. La sincronización automática aplica los resultados finales; tú puedes corregir cualquiera a mano.
+  </p>
+  <% if @sync_enabled %>
+    <%= button_to "Sincronizar ahora", sync_admin_matches_path, method: :post,
+          class: "flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+  <% else %>
+    <span class="flex-shrink-0 text-xs text-[var(--color-muted-foreground)]">Sync API: configura <code class="font-mono">FOOTBALL_DATA_API_TOKEN</code></span>
+  <% end %>
+</div>
+
 <div class="space-y-8">
   <% Match::STAGES.each do |stage| %>
     <% matches = @matches_by_stage[stage] %>
