@@ -131,3 +131,34 @@ puts "  Creados:      #{created}"
 puts "  Actualizados: #{updated}"
 puts "  Total:        #{Match.count} partidos"
 puts "  Por ronda:    " + Match.group(:stage).count.to_s
+
+# ---------------------------------------------------------------------------
+# Cuentas y torneo de demo — SOLO fuera de producción. Idempotente.
+# Para que cualquier entorno de preview tenga un admin con el que entrar.
+# ---------------------------------------------------------------------------
+unless Rails.env.production?
+  tournament = Tournament.current
+
+  admin = User.find_or_initialize_by(email: "admin@quiniela.mx")
+  admin.assign_attributes(
+    first_name: "Admin", last_name: "Quiniela", display_name: "Admin",
+    role: :admin, password: "password", password_confirmation: "password"
+  )
+  admin.save!
+
+  player = User.find_or_initialize_by(email: "jugador@quiniela.mx")
+  player.assign_attributes(
+    first_name: "Juan", last_name: "Pérez", display_name: "Juanito",
+    role: :student, password: "password", password_confirmation: "password"
+  )
+  player.save!
+
+  # Inscripción pagada del jugador de demo, para probar predicciones/leaderboard.
+  entry = Entry.find_or_initialize_by(user: player, tournament: tournament)
+  entry.update!(status: :paid, amount: tournament.entry_fee, paid_at: Time.current) unless entry.paid?
+
+  puts ""
+  puts "Cuentas de demo (no-producción):"
+  puts "  Admin:    admin@quiniela.mx / password"
+  puts "  Jugador:  jugador@quiniela.mx / password (inscripción pagada)"
+end
