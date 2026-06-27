@@ -32,15 +32,15 @@
         <div class="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-3 text-sm">
           <div class="min-w-0">
             <span class="text-xs text-[var(--color-muted-foreground)]"><%= match.stage_name %></span>
-            <p class="font-medium truncate"><%= match.display_home %> vs <%= match.display_away %></p>
+            <p class="font-medium truncate"><%= team_label(match.display_home) %> vs <%= team_label(match.display_away) %></p>
           </div>
           <div class="text-right flex-shrink-0 ml-3">
             <% if match.status == "finished" %>
-              <p class="text-xs text-[var(--color-muted-foreground)]"><%= match.home_score %>–<%= match.away_score %> · avanza <%= match.advancing_team %></p>
+              <p class="text-xs text-[var(--color-muted-foreground)]"><%= match.home_score %>–<%= match.away_score %> · avanza <%= team_label(match.advancing_team) %></p>
             <% end %>
             <% if prediction&.advancing_pick.present? %>
               <p class="text-xs <%= prediction.points_awarded.positive? ? 'text-[var(--color-success)]' : 'text-[var(--color-muted-foreground)]' %>">
-                Tu pick: <%= prediction.advancing_pick %><%= " · +#{prediction.points_awarded}" if match.status == "finished" %>
+                Tu pick: <%= team_label(prediction.advancing_pick) %><%= " · +#{prediction.points_awarded}" if match.status == "finished" %>
               </p>
             <% else %>
               <p class="text-xs text-[var(--color-muted-foreground)]">Sin predicción</p>

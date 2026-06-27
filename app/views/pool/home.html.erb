@@ -41,7 +41,7 @@
           <div class="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-3 text-sm">
             <div class="min-w-0">
               <span class="text-xs text-[var(--color-muted-foreground)]"><%= match.stage_name %></span>
-              <p class="font-medium truncate"><%= match.display_home %> <span class="text-[var(--color-muted-foreground)]">vs</span> <%= match.display_away %></p>
+              <p class="font-medium truncate"><%= team_label(match.display_home) %> <span class="text-[var(--color-muted-foreground)]">vs</span> <%= team_label(match.display_away) %></p>
             </div>
             <span class="text-xs text-[var(--color-muted-foreground)] flex-shrink-0 ml-3">
               <%= match.kickoff_at.in_time_zone(StudioSetting.studio_timezone).strftime("%d/%m %H:%M") %>

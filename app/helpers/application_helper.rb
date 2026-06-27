@@ -28,4 +28,15 @@ module ApplicationHelper
   def t_order_status(status)
     ORDER_STATUS_LABELS[status.to_s] || status.to_s.titleize
   end
+
+  # Bandera (emoji) de un equipo si lo reconocemos. nil para etiquetas como "2A".
+  def flag_emoji(name)
+    CountryFlags.emoji(name)
+  end
+
+  # "🇲🇽 México" cuando hay bandera; el texto tal cual para etiquetas/placeholder.
+  def team_label(name)
+    emoji = CountryFlags.emoji(name)
+    emoji ? "#{emoji} #{name}" : name
+  end
 end

@@ -14,13 +14,19 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <%= f.label :home_team, "Equipo local", class: "block text-sm font-medium mb-1" %>
-          <%= f.text_field :home_team, placeholder: @match.home_label, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+          <%= f.text_field :home_team, list: "wc-teams", placeholder: @match.home_label, autocomplete: "off", class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
         </div>
         <div>
           <%= f.label :away_team, "Equipo visitante", class: "block text-sm font-medium mb-1" %>
-          <%= f.text_field :away_team, placeholder: @match.away_label, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+          <%= f.text_field :away_team, list: "wc-teams", placeholder: @match.away_label, autocomplete: "off", class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
         </div>
       </div>
+      <datalist id="wc-teams">
+        <% CountryFlags::NAMES.each do |team| %>
+          <option value="<%= team %>"><%= CountryFlags.emoji(team) %> <%= team %></option>
+        <% end %>
+      </datalist>
+      <p class="text-xs text-[var(--color-muted-foreground)] -mt-2">Escribe o elige de la lista. Los nombres reconocidos muestran su bandera automáticamente.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -56,7 +62,7 @@
         <div>
           <label class="block text-sm font-medium mb-1">¿Quién avanza? <span class="text-xs text-[var(--color-muted-foreground)]">(resuelve penales)</span></label>
           <%= select_tag "match[advancing_team]",
-                options_for_select([ @match.home_team, @match.away_team ], @match.advancing_team),
+                options_for_select([ [ team_label(@match.home_team), @match.home_team ], [ team_label(@match.away_team), @match.away_team ] ], @match.advancing_team),
                 include_blank: "Selecciona…",
                 class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
         </div>

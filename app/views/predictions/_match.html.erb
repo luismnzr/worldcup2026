@@ -13,7 +13,7 @@
         <label class="flex items-center justify-center gap-2 cursor-pointer rounded-[var(--radius-md)] border px-3 py-2.5 text-sm font-medium transition-colors
                       <%= prediction.advancing_pick == team ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]' : 'border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-secondary)]' %>">
           <%= radio_button_tag "prediction[advancing_pick]", team, prediction.advancing_pick == team, class: "sr-only", id: "pick_#{match.id}_#{team.parameterize}" %>
-          <%= team %>
+          <%= team_label(team) %>
         </label>
       <% end %>
     </div>
