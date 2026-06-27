@@ -1,0 +1,13 @@
+Suscripción Confirmada
+
+Hola <%= @user.first_name %>, ¡tu suscripción está activa!
+
+Plan: <%= @plan.name %>
+Precio: <%= format_currency(@plan.price) %>/<%= @plan.interval_noun %>
+<% if @subscription.current_period_end.present? %>
+Próximo Cobro: <%= format_date(@subscription.current_period_end.to_date) %>
+<% end %>
+
+Tu membresía ya está activa.
+
+Ir a mi perfil: <%= profile_url %>

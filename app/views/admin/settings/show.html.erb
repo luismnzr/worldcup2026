@@ -1,0 +1,50 @@
+<% content_for(:page_title) { "Configuración del Estudio" } %>
+<div class="max-w-2xl">
+  <h2 class="text-lg font-semibold mb-6">Configuración del Estudio</h2>
+
+  <%= form_tag admin_settings_path, method: :patch, class: "space-y-8" do %>
+    <!-- Studio Information -->
+    <div class="bg-white rounded-xl border border-[var(--color-border)] p-6">
+      <h3 class="text-sm font-semibold text-[var(--color-foreground)] uppercase tracking-wider mb-4">Información del Estudio</h3>
+      <div class="space-y-4">
+        <div>
+          <label for="settings_studio_name" class="block text-sm font-medium text-[var(--color-foreground)] mb-1">Nombre del Estudio</label>
+          <input type="text" name="settings[studio_name]" id="settings_studio_name" value="<%= StudioSetting.get('studio_name') %>" class="w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]">
+        </div>
+        <div>
+          <label for="settings_studio_email" class="block text-sm font-medium text-[var(--color-foreground)] mb-1">Email de Contacto</label>
+          <input type="email" name="settings[studio_email]" id="settings_studio_email" value="<%= StudioSetting.get('studio_email') %>" class="w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]">
+        </div>
+        <div>
+          <label for="settings_studio_phone" class="block text-sm font-medium text-[var(--color-foreground)] mb-1">Número de Teléfono</label>
+          <input type="tel" name="settings[studio_phone]" id="settings_studio_phone" value="<%= StudioSetting.get('studio_phone') %>" class="w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]">
+        </div>
+        <div>
+          <label for="settings_studio_address" class="block text-sm font-medium text-[var(--color-foreground)] mb-1">Dirección</label>
+          <textarea name="settings[studio_address]" id="settings_studio_address" rows="2" class="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"><%= StudioSetting.get('studio_address') %></textarea>
+        </div>
+        <div>
+          <label for="settings_studio_schedule" class="block text-sm font-medium text-[var(--color-foreground)] mb-1">Horario</label>
+          <textarea name="settings[studio_schedule]" id="settings_studio_schedule" rows="4" class="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"><%= StudioSetting.get('studio_schedule') %></textarea>
+          <p class="text-xs text-[var(--color-muted-foreground)] mt-1">Horario que se muestra en el pie de página. Usa saltos de línea para separar días y horas.</p>
+        </div>
+        <div>
+          <label for="settings_studio_timezone" class="block text-sm font-medium text-[var(--color-foreground)] mb-1">Zona Horaria</label>
+          <%= time_zone_select nil, nil, ActiveSupport::TimeZone.us_zones, { default: StudioSetting.get('studio_timezone') }, { name: "settings[studio_timezone]", id: "settings_studio_timezone", class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" } %>
+        </div>
+        <div>
+          <label for="settings_currency" class="block text-sm font-medium text-[var(--color-foreground)] mb-1">Moneda</label>
+          <select name="settings[currency]" id="settings_currency" class="w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]">
+            <% [["MXN (Peso Mexicano)", "mxn"], ["USD (Dólar Estadounidense)", "usd"], ["EUR (Euro)", "eur"]].each do |label, val| %>
+              <option value="<%= val %>" <%= 'selected' if StudioSetting.get('currency') == val %>><%= label %></option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer">Guardar Configuración</button>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,23 @@
+<%
+  tabs = [
+    { label: "Resumen",      path: profile_path },
+    { label: "Pedidos",      path: profile_orders_path },
+    { label: "Eventos",      path: profile_events_path },
+    { label: "Suscripción",  path: profile_subscription_path },
+    { label: "Pagos",        path: profile_billing_path }
+  ]
+%>
+
+<nav class="border-b border-[var(--color-border)] mb-6 -mx-1 px-1 overflow-x-auto">
+  <ul class="flex items-center gap-1 min-w-max">
+    <% tabs.each do |tab| %>
+      <% active = current_page?(tab[:path]) %>
+      <li>
+        <%= link_to tab[:path],
+              class: "inline-flex items-center px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap #{active ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--color-border)]'}" do %>
+          <%= tab[:label] %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+</nav>

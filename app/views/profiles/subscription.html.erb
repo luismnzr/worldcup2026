@@ -1,0 +1,46 @@
+<% content_for(:title) { "Mi Suscripción" } %>
+
+<div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
+  <h1 class="text-xl font-bold text-[var(--color-foreground)] mb-6">Mi Suscripción</h1>
+
+  <%= render "tabs" %>
+
+  <% if @user_subscription&.active? %>
+    <%= render Ui::CardComponent.new do %>
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-lg font-semibold"><%= @user_subscription.subscription_plan.name %></h2>
+          <% if @user_subscription.subscription_plan.description.present? %>
+            <p class="text-[var(--color-muted-foreground)]"><%= @user_subscription.subscription_plan.description %></p>
+          <% end %>
+        </div>
+        <%= render Ui::BadgeComponent.new(text: "Activa", variant: :success) %>
+      </div>
+      <div class="grid grid-cols-2 gap-4 mt-6">
+        <div>
+          <p class="text-sm text-[var(--color-muted-foreground)]">Precio</p>
+          <p class="font-medium">$<%= number_with_precision(@user_subscription.subscription_plan.price, precision: 0) %> MXN/<%= @user_subscription.subscription_plan.interval_noun %></p>
+        </div>
+        <div>
+          <p class="text-sm text-[var(--color-muted-foreground)]">Fin del Período Actual</p>
+          <p class="font-medium"><%= @user_subscription.current_period_end&.strftime("%d/%m/%Y") || "N/A" %></p>
+        </div>
+      </div>
+      <div class="mt-6 flex gap-3">
+        <% if current_user.stripe_customer_id.present? %>
+          <%= button_to customer_portal_path, method: :post,
+                class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors shadow-sm cursor-pointer" do %>
+            Administrar Suscripción
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <%= render Ui::CardComponent.new do %>
+      <div class="text-center py-8">
+        <p class="text-[var(--color-muted-foreground)] mb-4">No tienes una suscripción activa.</p>
+        <%= render Ui::ButtonComponent.new(href: subscription_plans_path) do %>Ver Planes de Suscripción<% end %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

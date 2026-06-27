@@ -1,0 +1,35 @@
+<% content_for(:title) { "Restablecer Contraseña" } %>
+
+<div class="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <h1 class="text-2xl font-bold">Restablece tu contraseña</h1>
+      <p class="text-[var(--color-muted-foreground)] mt-2">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña</p>
+    </div>
+
+    <%= render Ui::CardComponent.new do %>
+      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: "space-y-4" }) do |f| %>
+        <% if flash[:alert].present? %>
+          <%= render Ui::AlertComponent.new(variant: :destructive) do %><%= flash[:alert] %><% end %>
+        <% end %>
+
+        <%= render Ui::InputComponent.new(
+          name: "user[email]",
+          type: "email",
+          label: "Correo electrónico",
+          value: resource.email,
+          placeholder: "tu@ejemplo.com",
+          required: true,
+          autocomplete: "email"
+        ) %>
+
+        <%= render Ui::ButtonComponent.new(type: "submit", full_width: true) do %>Enviar Enlace<% end %>
+      <% end %>
+    <% end %>
+
+    <p class="text-center text-sm text-[var(--color-muted-foreground)] mt-6">
+      ¿Recuerdas tu contraseña?
+      <%= link_to "Iniciar sesión", new_user_session_path, class: "font-medium text-[var(--color-foreground)] hover:underline" %>
+    </p>
+  </div>
+</div>

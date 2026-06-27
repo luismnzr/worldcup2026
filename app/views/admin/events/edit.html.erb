@@ -1,0 +1,8 @@
+<% content_for(:page_title) { "Editar Evento" } %>
+<div class="max-w-2xl">
+  <%= link_to "&larr; Volver".html_safe, admin_events_path, class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] mb-4 inline-block" %>
+  <div class="bg-white rounded-xl border border-[var(--color-border)] p-6">
+    <h2 class="text-lg font-semibold mb-6">Editar Evento</h2>
+    <%= render "form", event: @event %>
+  </div>
+</div>

@@ -1,0 +1,69 @@
+<% content_for(:page_title) { "Editar Usuario" } %>
+
+<div class="max-w-2xl">
+  <%= link_to "&larr; Volver al Usuario".html_safe, admin_user_path(@user), class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] mb-4 inline-block" %>
+
+  <div class="bg-white rounded-xl border border-[var(--color-border)] p-6">
+    <h2 class="text-lg font-semibold mb-6">Editar <%= @user.full_name %></h2>
+
+    <%= form_with(model: @user, url: admin_user_path(@user), class: "space-y-5") do |f| %>
+      <% if @user.errors.any? %>
+        <div class="p-4 rounded-lg bg-red-50 text-red-700 text-sm">
+          <p class="font-medium mb-1"><%= pluralize(@user.errors.count, "error") %> impidieron guardar:</p>
+          <ul class="list-disc pl-5 space-y-1">
+            <% @user.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= f.label :first_name, "Nombre", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+          <%= f.text_field :first_name, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+        <div>
+          <%= f.label :last_name, "Apellido", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+          <%= f.text_field :last_name, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :email, "Email", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+        <%= f.email_field :email, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      </div>
+
+      <div>
+        <%= f.label :phone, "Teléfono", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+        <%= render "shared/phone_field", field_name: "user[phone]", value: @user.phone, required: false %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= f.label :role, "Rol", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+          <%= f.select :role, User.roles.keys.map { |r| [r.titleize, r] }, {}, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+        <div>
+          <%= f.label :active, "Estado", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+          <%= f.select :active, [["Activo", true], ["Inactivo", false]], {}, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :stripe_customer_id, "Stripe Customer ID", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+        <%= f.text_field :stripe_customer_id, placeholder: "cus_...", class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      </div>
+
+      <div>
+        <%= f.label :notes, "Notas (admin)", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+        <%= f.text_area :notes, rows: 3, placeholder: "Notas internas sobre el usuario...", class: "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none" %>
+      </div>
+
+      <div class="flex items-center gap-3 pt-2">
+        <%= f.submit "Actualizar Usuario", class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+        <%= link_to "Cancelar", admin_user_path(@user), class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]" %>
+      </div>
+    <% end %>
+  </div>
+</div>

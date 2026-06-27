@@ -1,0 +1,135 @@
+<% content_for(:page_title) { "Usuarios" } %>
+
+<div class="flex items-center gap-3 mb-4">
+  <div class="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto -mx-1 px-1">
+    <% %w[all student admin].each do |role| %>
+      <% active = (role == "all" && params[:role].blank?) || params[:role] == role %>
+      <%= link_to admin_users_path(role: role == "all" ? nil : role, sort: params[:sort], status: params[:status], q: params[:q]),
+            class: "px-3 py-1.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap flex-shrink-0 #{active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-muted-foreground)] hover:bg-[var(--color-muted)]'}" do %>
+        <%= role.titleize %><%= role == "all" ? "s" : "s" %>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="flex items-center gap-3 flex-shrink-0">
+    <p class="text-sm text-[var(--color-muted-foreground)] whitespace-nowrap"><%= @pagy.count %> usuarios</p>
+    <%= link_to "Nuevo Usuario", new_admin_user_path, class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors whitespace-nowrap" %>
+  </div>
+</div>
+
+<div class="mb-6 space-y-3">
+  <%# Search bar with autocomplete + Enter to filter %>
+  <div class="relative" data-controller="user-search" data-user-search-url-value="<%= search_admin_users_path %>" data-user-search-index-url-value="<%= admin_users_path %>">
+    <div class="relative">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--color-muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text"
+             value="<%= params[:q] %>"
+             placeholder="Buscar usuarios por nombre o email..."
+             autocomplete="off"
+             data-user-search-target="input"
+             data-action="input->user-search#search keydown->user-search#submitSearch"
+             class="w-full h-10 pl-9 pr-3 bg-white rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]">
+    </div>
+    <div data-user-search-target="results"
+         class="hidden absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-[var(--color-border)] shadow-lg overflow-hidden z-50 max-h-80 overflow-y-auto">
+    </div>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+    <%# Sort dropdown %>
+    <% sort_options = [
+      ["Más recientes", nil],
+      ["Nombre A–Z", "name_asc"],
+      ["Nombre Z–A", "name_desc"]
+    ] %>
+    <select onchange="window.location.href=this.value"
+            class="h-10 pl-3 pr-8 bg-white rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] appearance-none"
+            style="background-image: url('data:image/svg+xml,<%== CGI.escape('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>') %>'); background-repeat: no-repeat; background-position: right 0.5rem center;">
+      <% sort_options.each do |label, value| %>
+        <% url = admin_users_path(sort: value, role: params[:role], status: params[:status], q: params[:q]) %>
+        <option value="<%= url %>" <%= "selected" if params[:sort] == value&.to_s %>>
+          <%= label %>
+        </option>
+      <% end %>
+    </select>
+
+    <%# Status filter %>
+    <% status_options = [
+      ["Todos estados", nil],
+      ["Activos", "active"],
+      ["Inactivos", "inactive"]
+    ] %>
+    <select onchange="window.location.href=this.value"
+            class="h-10 pl-3 pr-8 bg-white rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] appearance-none"
+            style="background-image: url('data:image/svg+xml,<%== CGI.escape('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>') %>'); background-repeat: no-repeat; background-position: right 0.5rem center;">
+      <% status_options.each do |label, value| %>
+        <% url = admin_users_path(status: value, role: params[:role], sort: params[:sort], q: params[:q]) %>
+        <option value="<%= url %>" <%= "selected" if params[:status] == value&.to_s %>>
+          <%= label %>
+        </option>
+      <% end %>
+    </select>
+  </div>
+</div>
+
+<% if params[:q].present? %>
+  <div class="flex items-center gap-2 mb-4">
+    <p class="text-sm text-[var(--color-muted-foreground)]">
+      Resultados para "<span class="font-medium text-[var(--color-foreground)]"><%= params[:q] %></span>"
+    </p>
+    <%= link_to admin_users_path(role: params[:role], sort: params[:sort], status: params[:status]),
+          class: "text-sm text-[var(--color-primary)] hover:underline" do %>
+      Limpiar búsqueda
+    <% end %>
+  </div>
+<% end %>
+
+<div class="bg-white rounded-xl border border-[var(--color-border)] overflow-hidden">
+  <div class="overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-[var(--color-muted)]/50">
+      <tr>
+        <th class="px-5 py-3 text-left font-medium text-[var(--color-muted-foreground)]">Usuario</th>
+        <th class="px-5 py-3 text-left font-medium text-[var(--color-muted-foreground)]">Email</th>
+        <th class="px-5 py-3 text-left font-medium text-[var(--color-muted-foreground)]">Teléfono</th>
+        <th class="px-5 py-3 text-left font-medium text-[var(--color-muted-foreground)]">Rol</th>
+        <th class="px-5 py-3 text-left font-medium text-[var(--color-muted-foreground)]">Estado</th>
+        <th class="px-5 py-3 text-left font-medium text-[var(--color-muted-foreground)]">Registro</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-[var(--color-border)]">
+      <% @users.each do |user| %>
+        <tr class="hover:bg-[var(--color-muted)]/30">
+          <td class="px-5 py-3">
+            <div class="flex items-center gap-3">
+              <div class="h-8 w-8 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center flex-shrink-0">
+                <span class="text-xs font-medium text-[var(--color-primary)]"><%= user.first_name[0] %><%= user.last_name[0] %></span>
+              </div>
+              <%= link_to user.full_name, admin_user_path(user), class: "font-medium text-[var(--color-foreground)] hover:text-[var(--color-primary)] hover:underline" %>
+            </div>
+          </td>
+          <td class="px-5 py-3 text-[var(--color-muted-foreground)]"><%= user.email %></td>
+          <td class="px-5 py-3 text-[var(--color-muted-foreground)]"><%= user.phone.presence || "—" %></td>
+          <td class="px-5 py-3">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                        <%= user.role == 'admin' ? 'bg-purple-50 text-purple-700' : 'bg-gray-100 text-gray-700' %>">
+              <%= user.role.titleize %>
+            </span>
+          </td>
+          <td class="px-5 py-3">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= user.active? ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' %>">
+              <%= user.active? ? "Activo" : "Inactivo" %>
+            </span>
+          </td>
+          <td class="px-5 py-3 text-[var(--color-muted-foreground)]"><%= user.created_at.strftime("%b %d, %Y") %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<% if @pagy.pages > 1 %>
+  <div class="flex justify-center mt-6">
+    <%== @pagy.series_nav %>
+  </div>
+<% end %>

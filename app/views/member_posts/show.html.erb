@@ -1,0 +1,26 @@
+<% content_for(:title) { @post.title } %>
+
+<article class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+  <%= link_to "&larr; Volver a Miembros".html_safe, member_posts_path,
+        class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] mb-6 inline-block" %>
+
+  <% if @post.cover_image.attached? %>
+    <div class="aspect-[16/9] rounded-xl overflow-hidden mb-8">
+      <%= image_tag @post.cover_image.variant(resize_to_limit: [ 1400, 800 ]),
+            class: "h-full w-full object-cover" %>
+    </div>
+  <% end %>
+
+  <p class="text-xs text-[var(--color-muted-foreground)] uppercase tracking-wider mb-2">
+    <%= l(@post.published_at.to_date, format: "%d %B %Y") %>
+  </p>
+  <h1 class="text-3xl font-bold tracking-tight text-[var(--color-foreground)]"><%= @post.title %></h1>
+
+  <% if @post.excerpt.present? %>
+    <p class="mt-4 text-lg text-[var(--color-muted-foreground)] leading-relaxed"><%= @post.excerpt %></p>
+  <% end %>
+
+  <div class="mt-8 text-base text-[var(--color-foreground)] leading-relaxed space-y-4">
+    <%= simple_format @post.body, {}, sanitize: true %>
+  </div>
+</article>

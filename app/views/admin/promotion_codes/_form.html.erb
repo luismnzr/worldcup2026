@@ -1,0 +1,50 @@
+<%= form_with(model: [:admin, promotion_code], class: "space-y-5") do |f| %>
+  <% if promotion_code.errors.any? %>
+    <div class="p-4 rounded-lg bg-red-50 text-red-700 text-sm">
+      <ul class="list-disc pl-5 space-y-1"><% promotion_code.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %></ul>
+    </div>
+  <% end %>
+  <div>
+    <%= f.label :code, "Código", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+    <%= f.text_field :code, placeholder: "VERANO25", class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+    <p class="mt-1 text-xs text-[var(--color-muted-foreground)]">El código que los clientes ingresarán al pagar.</p>
+  </div>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <%= f.label :discount_type, "Tipo de Descuento", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+      <%= f.select :discount_type, [["Porcentaje (%)", "percent_off"], ["Monto fijo ($)", "amount_off"]], {}, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+    </div>
+    <div>
+      <%= f.label :discount_value, "Valor", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+      <%= f.number_field :discount_value, step: 0.01, min: 0, placeholder: "20", class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+    </div>
+  </div>
+  <div>
+    <%= f.label :applies_to, "Aplica a", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+    <%= f.select :applies_to,
+          [ [ "Todo", "all" ], [ "Suscripciones", "subscription" ], [ "Productos", "product" ], [ "Eventos", "event" ] ],
+          {},
+          class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+    <p class="mt-1 text-xs text-[var(--color-muted-foreground)]">Define el tipo de pago al que se permite usar el código.</p>
+  </div>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <%= f.label :max_redemptions, "Usos máximos", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+      <%= f.number_field :max_redemptions, min: 1, placeholder: "Ilimitado", class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      <p class="mt-1 text-xs text-[var(--color-muted-foreground)]">Dejar vacío para usos ilimitados.</p>
+    </div>
+    <div>
+      <%= f.label :expires_at, "Fecha de expiración", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+      <%= f.datetime_local_field :expires_at, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      <p class="mt-1 text-xs text-[var(--color-muted-foreground)]">Dejar vacío para que no expire.</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <%= f.check_box :active, class: "h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]" %>
+    <%= f.label :active, "Activo", class: "text-sm font-medium text-[var(--color-foreground)]" %>
+  </div>
+  <div class="flex items-center gap-3 pt-2">
+    <%= f.submit "Crear Código", class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+    <%= link_to "Cancelar", admin_promotion_codes_path, class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]" %>
+  </div>
+<% end %>

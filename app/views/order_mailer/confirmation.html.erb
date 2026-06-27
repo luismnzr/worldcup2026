@@ -1,0 +1,41 @@
+<h1 style="margin: 0 0 8px 0; font-size: 22px; font-weight: 700; color: #0f172a;">¡Gracias por tu compra!</h1>
+<p style="margin: 0 0 24px 0; font-size: 15px; color: #64748b; line-height: 1.5;">Recibimos tu pedido <strong>#<%= @order.id %></strong>. Te avisaremos en cuanto lo enviemos.</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 24px;">
+  <tr>
+    <td style="padding: 20px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        <% @items.each do |item| %>
+          <tr>
+            <td style="padding: 8px 0; font-size: 14px; color: #0f172a;">
+              <%= item.product.name %> &times; <%= item.quantity %>
+            </td>
+            <td style="padding: 8px 0; font-size: 14px; color: #0f172a; text-align: right; font-weight: 500;">
+              <%= format_currency(item.unit_price * item.quantity) %>
+            </td>
+          </tr>
+        <% end %>
+        <tr><td colspan="2" style="border-top: 1px solid #e2e8f0; padding: 0;"></td></tr>
+        <%= email_detail_row("Subtotal", format_currency(@order.subtotal)) %>
+        <% if @order.shipping_cost.to_d.positive? %>
+          <%= email_detail_row("Envío", format_currency(@order.shipping_cost)) %>
+        <% end %>
+        <% if @order.discount_total.to_d.positive? %>
+          <%= email_detail_row("Descuento", "−#{format_currency(@order.discount_total)}") %>
+        <% end %>
+        <%= email_detail_row("Total", format_currency(@order.total)) %>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<% if @order.shipping_address_lines.any? %>
+  <p style="margin: 0 0 8px 0; font-size: 14px; color: #0f172a; font-weight: 600;">Dirección de envío</p>
+  <p style="margin: 0 0 24px 0; font-size: 14px; color: #64748b; line-height: 1.5;">
+    <% @order.shipping_address_lines.each do |line| %>
+      <%= line %><br>
+    <% end %>
+  </p>
+<% end %>
+
+<%= email_button("Ver mis pedidos", profile_url) %>

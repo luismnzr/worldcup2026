@@ -1,0 +1,55 @@
+<%# Shared phone input with country code dropdown and formatting.
+    Locals:
+      field_name  – form field name, e.g. "user[phone]"  (required)
+      value       – current phone value                   (optional)
+      required    – whether the field is required          (optional, default true)
+      input_id    – DOM id for the hidden input            (optional)
+      label_class – CSS class for the label text size      (optional, default "text-sm")
+%>
+<% field_name  ||= "user[phone]" %>
+<% value       ||= nil %>
+<% required    = true if local_assigns[:required].nil? %>
+<% input_id    ||= nil %>
+<% label_class ||= "text-sm" %>
+
+<div data-controller="phone-input" class="relative">
+  <div class="flex">
+    <button type="button"
+            data-phone-input-target="code"
+            data-action="click->phone-input#toggleDropdown"
+            class="inline-flex items-center gap-1 h-10 px-2.5 rounded-l-lg border border-r-0 border-[var(--color-border)] bg-[var(--color-muted)]/50 text-sm font-medium text-[var(--color-foreground)] hover:bg-[var(--color-muted)] transition-colors cursor-pointer whitespace-nowrap">
+    </button>
+    <input type="text"
+           inputmode="numeric"
+           autocomplete="tel"
+           data-phone-input-target="display"
+           data-action="input->phone-input#onInput"
+           <% if required %>required<% end %>
+           class="flex-1 h-10 px-3 rounded-r-lg border border-[var(--color-border)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition">
+    <input type="hidden"
+           name="<%= field_name %>"
+           <% if input_id %>id="<%= input_id %>"<% end %>
+           value="<%= value %>"
+           data-phone-input-target="hidden">
+  </div>
+  <div data-phone-input-target="dropdown"
+       class="hidden absolute left-0 top-full mt-1 bg-white rounded-lg border border-[var(--color-border)] shadow-lg z-50 py-1 min-w-[180px]">
+    <% [
+      ["+52", "\u{1F1F2}\u{1F1FD}", "México"],
+      ["+1",  "\u{1F1FA}\u{1F1F8}", "Estados Unidos"],
+      ["+57", "\u{1F1E8}\u{1F1F4}", "Colombia"],
+      ["+54", "\u{1F1E6}\u{1F1F7}", "Argentina"],
+      ["+56", "\u{1F1E8}\u{1F1F1}", "Chile"],
+      ["+34", "\u{1F1EA}\u{1F1F8}", "España"],
+    ].each_with_index do |(code, flag, name), i| %>
+      <button type="button"
+              data-action="click->phone-input#selectCountry"
+              data-index="<%= i %>"
+              class="w-full flex items-center gap-2.5 px-3 py-1.5 text-sm hover:bg-[var(--color-muted)]/50 transition-colors cursor-pointer">
+        <span><%= flag %></span>
+        <span class="text-[var(--color-foreground)]"><%= name %></span>
+        <span class="ml-auto text-[var(--color-muted-foreground)]"><%= code %></span>
+      </button>
+    <% end %>
+  </div>
+</div>

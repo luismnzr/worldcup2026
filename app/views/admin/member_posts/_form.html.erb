@@ -1,0 +1,54 @@
+<%= form_with(model: [ :admin, member_post ], class: "space-y-5") do |f| %>
+  <% if member_post.errors.any? %>
+    <div class="p-4 rounded-lg bg-red-50 text-red-700 text-sm">
+      <ul class="list-disc pl-5 space-y-1"><% member_post.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %></ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :title, "Título", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+      <%= f.text_field :title, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+    </div>
+    <div>
+      <%= f.label :slug, class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+      <%= f.text_field :slug, placeholder: "se genera automáticamente",
+            class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm font-mono lowercase focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      <p class="text-xs text-[var(--color-muted-foreground)] mt-1">URL: /miembros/<span class="font-mono"><%= member_post.slug.presence || "[slug]" %></span></p>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :excerpt, "Resumen", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+    <%= f.text_area :excerpt, rows: 2, class: "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+    <p class="text-xs text-[var(--color-muted-foreground)] mt-1">Texto corto que se muestra en el listado.</p>
+  </div>
+
+  <div>
+    <%= f.label :cover_image, "Imagen de portada", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+    <%= f.file_field :cover_image, accept: "image/*",
+          class: "block w-full text-sm text-[var(--color-muted-foreground)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[var(--color-primary)]/10 file:text-[var(--color-primary)] hover:file:bg-[var(--color-primary)]/20" %>
+    <% if member_post.cover_image.attached? %>
+      <p class="text-xs text-[var(--color-muted-foreground)] mt-1">Actual: <%= member_post.cover_image.filename %></p>
+    <% end %>
+  </div>
+
+  <div>
+    <%= f.label :body, "Contenido", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+    <%= f.text_area :body, rows: 14, class: "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] font-mono leading-relaxed" %>
+    <p class="text-xs text-[var(--color-muted-foreground)] mt-1">Texto plano. Doble salto de línea separa párrafos.</p>
+  </div>
+
+  <div>
+    <%= f.label :published_at, "Publicado en", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+    <%= f.datetime_local_field :published_at,
+          class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+    <p class="text-xs text-[var(--color-muted-foreground)] mt-1">Déjalo vacío para mantener como borrador.</p>
+  </div>
+
+  <div class="flex items-center gap-3 pt-2">
+    <%= f.submit class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+    <%= link_to "Cancelar", admin_member_posts_path,
+          class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]" %>
+  </div>
+<% end %>

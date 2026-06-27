@@ -1,0 +1,70 @@
+<% content_for(:title) { "Mis Eventos" } %>
+
+<div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
+  <h1 class="text-xl font-bold text-[var(--color-foreground)] mb-6">Mis Eventos</h1>
+
+  <%= render "tabs" %>
+
+  <h2 class="text-sm font-semibold text-[var(--color-foreground)] uppercase tracking-wider mb-3">Próximos</h2>
+  <% if @upcoming_registrations.any? %>
+    <div class="bg-white rounded-xl border border-[var(--color-border)] overflow-hidden mb-8">
+      <ul class="divide-y divide-[var(--color-border)]">
+        <% @upcoming_registrations.each do |reg| %>
+          <li class="flex items-center gap-4 px-5 py-4">
+            <div class="flex-shrink-0 text-center w-12">
+              <p class="text-xs text-[var(--color-muted-foreground)] uppercase"><%= l(reg.event.date, format: "%b") %></p>
+              <p class="text-lg font-semibold text-[var(--color-foreground)]"><%= reg.event.date.day %></p>
+            </div>
+            <div class="flex-1 min-w-0">
+              <%= link_to event_path(reg.event), class: "block hover:text-[var(--color-primary)] transition-colors" do %>
+                <p class="font-medium text-[var(--color-foreground)] truncate"><%= reg.event.title %></p>
+              <% end %>
+              <p class="text-xs text-[var(--color-muted-foreground)] mt-0.5">
+                <% if reg.event.start_time %>
+                  <%= reg.event.start_time.strftime("%l:%M %p").strip %>
+                <% end %>
+                <% if reg.event.location.present? %>
+                  &middot; <%= reg.event.location %>
+                <% end %>
+              </p>
+            </div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+              Confirmado
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-xl border border-[var(--color-border)] p-10 text-center mb-8">
+      <p class="text-sm text-[var(--color-muted-foreground)] mb-3">No tienes eventos próximos.</p>
+      <%= link_to "Ver eventos disponibles", events_path,
+            class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors" %>
+    </div>
+  <% end %>
+
+  <% if @past_registrations.any? %>
+    <h2 class="text-sm font-semibold text-[var(--color-foreground)] uppercase tracking-wider mb-3">Pasados</h2>
+    <div class="bg-white rounded-xl border border-[var(--color-border)] overflow-hidden">
+      <ul class="divide-y divide-[var(--color-border)]">
+        <% @past_registrations.each do |reg| %>
+          <li class="flex items-center gap-4 px-5 py-3">
+            <div class="flex-shrink-0 text-center w-12">
+              <p class="text-xs text-[var(--color-muted-foreground)] uppercase"><%= l(reg.event.date, format: "%b") %></p>
+              <p class="text-sm font-semibold text-[var(--color-muted-foreground)]"><%= reg.event.date.day %></p>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-[var(--color-foreground)] truncate"><%= reg.event.title %></p>
+              <p class="text-xs text-[var(--color-muted-foreground)] mt-0.5"><%= l(reg.event.date, format: "%d/%m/%Y") %></p>
+            </div>
+            <% if reg.status == "cancelled" %>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">Cancelado</span>
+            <% else %>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Asistido</span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div>

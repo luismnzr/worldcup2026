@@ -1,0 +1,46 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Mass Assignment",
+      "warning_code": 105,
+      "check_name": "PermitAttributes",
+      "message": "Potentially dangerous key allowed for mass assignment",
+      "file": "app/controllers/admin/users_controller.rb",
+      "code": "params.require(:user).permit(:first_name, :last_name, :email, :role, :active, :phone, :photo, :stripe_customer_id, :notes, :featured)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::UsersController",
+        "method": "user_params"
+      },
+      "user_input": ":role",
+      "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
+      "note": "Admin-only controller gated by Admin::BaseController. Admins are authorized to update user role and active status."
+    },
+    {
+      "warning_type": "Mass Assignment",
+      "warning_code": 105,
+      "check_name": "PermitAttributes",
+      "message": "Potentially dangerous key allowed for mass assignment",
+      "file": "app/controllers/admin/users_controller.rb",
+      "code": "params.require(:user).permit(:first_name, :last_name, :email, :role, :active, :phone, :password, :password_confirmation, :photo)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::UsersController",
+        "method": "user_create_params"
+      },
+      "user_input": ":role",
+      "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
+      "note": "Admin-only controller gated by Admin::BaseController. Admins are authorized to assign role and active status when creating users."
+    }
+  ],
+  "updated": "2026-04-30 00:00:00 +0000",
+  "brakeman_version": "8.0.2"
+}

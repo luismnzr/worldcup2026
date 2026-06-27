@@ -1,0 +1,20 @@
+¡Gracias por tu compra!
+
+Recibimos tu pedido #<%= @order.id %>. Te avisaremos en cuanto lo enviemos.
+
+<% @items.each do |item| %>
+- <%= item.product.name %> x <%= item.quantity %> — <%= format_currency(item.unit_price * item.quantity) %>
+<% end %>
+
+Subtotal: <%= format_currency(@order.subtotal) %>
+<% if @order.shipping_cost.to_d.positive? %>Envío: <%= format_currency(@order.shipping_cost) %>
+<% end %><% if @order.discount_total.to_d.positive? %>Descuento: −<%= format_currency(@order.discount_total) %>
+<% end %>Total: <%= format_currency(@order.total) %>
+
+<% if @order.shipping_address_lines.any? %>
+Dirección de envío:
+<% @order.shipping_address_lines.each do |line| %><%= line %>
+<% end %>
+<% end %>
+
+Ver mis pedidos: <%= profile_url %>

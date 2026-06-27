@@ -1,0 +1,19 @@
+<% content_for(:title) { "About" } %>
+
+<div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16">
+  <h1 class="text-3xl font-bold mb-8">Sobre Nosotros</h1>
+
+  <%= render Ui::CardComponent.new do %>
+    <div class="prose max-w-none">
+      <p class="text-lg text-[var(--color-muted-foreground)]">
+        Bienvenido a <%= StudioSetting.get("studio_name") %>.
+      </p>
+      <h2 class="text-xl font-semibold mt-8 mb-4">Visítanos</h2>
+      <p class="text-[var(--color-muted-foreground)]">
+        <%= StudioSetting.get("studio_address") %><br>
+        <%= StudioSetting.get("studio_phone") %><br>
+        <%= StudioSetting.get("studio_email") %>
+      </p>
+    </div>
+  <% end %>
+</div>

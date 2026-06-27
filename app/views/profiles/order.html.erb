@@ -1,0 +1,83 @@
+<% content_for(:title) { "Pedido ##{@order.id}" } %>
+
+<div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-8">
+  <%= link_to "&larr; Volver a mis pedidos".html_safe, profile_orders_path,
+        class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] mb-4 inline-block" %>
+
+  <div class="bg-white rounded-xl border border-[var(--color-border)] p-6 mb-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-lg font-semibold">Pedido #<%= @order.id %></h1>
+        <p class="text-sm text-[var(--color-muted-foreground)]"><%= l(@order.created_at, format: "%d %B %Y, %l:%M %p") %></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
+                    <%= case @order.shipping_status
+                        when 'unfulfilled' then 'bg-amber-50 text-amber-700'
+                        when 'fulfilled'   then 'bg-blue-50 text-blue-700'
+                        when 'shipped'     then 'bg-violet-50 text-violet-700'
+                        when 'delivered'   then 'bg-emerald-50 text-emerald-700'
+                        end %>">
+          <%= t_shipping_status(@order.shipping_status) %>
+        </span>
+      </div>
+    </div>
+
+    <div class="bg-[var(--color-muted)]/30 rounded-lg overflow-hidden">
+      <table class="w-full text-sm">
+        <tbody class="divide-y divide-[var(--color-border)]">
+          <% @order.order_items.each do |item| %>
+            <tr>
+              <td class="px-4 py-3 text-[var(--color-foreground)]">
+                <span class="font-medium"><%= item.product.name %></span>
+                <span class="text-[var(--color-muted-foreground)]"> &times; <%= item.quantity %></span>
+              </td>
+              <td class="px-4 py-3 text-right font-medium"><%= number_to_currency(item.unit_price * item.quantity) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="px-4 py-2 text-[var(--color-muted-foreground)] text-right">Subtotal</td>
+            <td class="px-4 py-2 text-right"><%= number_to_currency(@order.subtotal) %></td>
+          </tr>
+          <% if @order.shipping_cost.to_d.positive? %>
+            <tr>
+              <td class="px-4 py-2 text-[var(--color-muted-foreground)] text-right">Envío</td>
+              <td class="px-4 py-2 text-right"><%= number_to_currency(@order.shipping_cost) %></td>
+            </tr>
+          <% end %>
+          <% if @order.discount_total.to_d.positive? %>
+            <tr>
+              <td class="px-4 py-2 text-[var(--color-muted-foreground)] text-right">Descuento</td>
+              <td class="px-4 py-2 text-right text-emerald-700">−<%= number_to_currency(@order.discount_total) %></td>
+            </tr>
+          <% end %>
+          <tr class="border-t border-[var(--color-border)]">
+            <td class="px-4 py-3 text-right font-semibold">Total</td>
+            <td class="px-4 py-3 text-right font-bold text-base"><%= number_to_currency(@order.total) %></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <% if @order.shipping_address_lines.any? %>
+    <div class="bg-white rounded-xl border border-[var(--color-border)] p-6 mb-6">
+      <h2 class="font-semibold text-sm mb-3">Dirección de envío</h2>
+      <div class="text-sm text-[var(--color-foreground)] space-y-0.5">
+        <% @order.shipping_address_lines.each do |line| %>
+          <p><%= line %></p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @order.tracking_number.present? %>
+    <div class="bg-white rounded-xl border border-[var(--color-border)] p-6">
+      <h2 class="font-semibold text-sm mb-2">Seguimiento</h2>
+      <p class="text-sm text-[var(--color-muted-foreground)]">Número de guía:</p>
+      <p class="font-mono font-medium"><%= @order.tracking_number %></p>
+    </div>
+  <% end %>
+</div>

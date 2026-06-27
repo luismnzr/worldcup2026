@@ -1,0 +1,64 @@
+<% content_for(:page_title) { "Nuevo Pedido" } %>
+<div class="max-w-2xl">
+  <%= link_to "&larr; Volver".html_safe, admin_orders_path, class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] mb-4 inline-block" %>
+  <div class="bg-white rounded-xl border border-[var(--color-border)] p-6">
+    <h2 class="text-lg font-semibold mb-6">Nuevo Pedido</h2>
+
+    <%= form_with(model: [:admin, @order], class: "space-y-5") do |f| %>
+      <% if @order.errors.any? %>
+        <div class="p-4 rounded-lg bg-red-50 text-red-700 text-sm">
+          <ul class="list-disc pl-5 space-y-1"><% @order.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %></ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :user_id, "Cliente (opcional)", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+        <%= f.collection_select :user_id, @users, :id, :full_name, { include_blank: "Cliente sin registro" },
+              class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= f.label :payment_method, "Método de Pago", class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+          <%= f.select :payment_method, [["Efectivo", "cash"], ["Tarjeta", "card"]],
+                {}, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+        <div>
+          <%= f.label :status, class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+          <%= f.select :status, [["Completado", "completed"], ["Pendiente", "pending"]],
+                {}, class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-[var(--color-foreground)] mb-3">Artículos</label>
+        <div id="order-items" class="space-y-3" data-controller="order-items">
+          <%= f.fields_for :order_items do |item_f| %>
+            <div class="flex items-center gap-3 order-item-row">
+              <div class="flex-1">
+                <%= item_f.collection_select :product_id, @products, :id,
+                      ->(p) { "#{p.name} — #{number_to_currency(p.price)}" },
+                      { include_blank: "Seleccionar producto..." },
+                      class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+              </div>
+              <div class="w-24">
+                <%= item_f.number_field :quantity, min: 1, value: item_f.object.quantity || 1, placeholder: "Cant.",
+                      class: "w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :notes, class: "block text-sm font-medium text-[var(--color-foreground)] mb-1" %>
+        <%= f.text_area :notes, rows: 2, placeholder: "Notas opcionales...", class: "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" %>
+      </div>
+
+      <div class="flex items-center gap-3 pt-2">
+        <%= f.submit "Crear Pedido", class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" %>
+        <%= link_to "Cancelar", admin_orders_path, class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]" %>
+      </div>
+    <% end %>
+  </div>
+</div>

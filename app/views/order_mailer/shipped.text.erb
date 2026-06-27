@@ -1,0 +1,8 @@
+Tu pedido está en camino
+
+El pedido #<%= @order.id %> fue enviado.
+<% if @tracking_number.present? %>
+Número de guía: <%= @tracking_number %>
+<% end %>
+
+Ver mi pedido: <%= profile_url %>

@@ -1,0 +1,81 @@
+<% content_for(:title) { "Eventos" } %>
+
+<div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+  <div class="text-center mb-10">
+    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)] mb-4">Eventos</span>
+    <h1 class="text-3xl font-bold text-[var(--color-foreground)]">Próximos Eventos</h1>
+    <p class="text-[var(--color-muted-foreground)] mt-3 max-w-xl mx-auto">
+      Talleres, retiros y experiencias especiales para complementar tu práctica.
+    </p>
+  </div>
+
+  <% if @upcoming_events.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+      <% @upcoming_events.each do |event| %>
+        <%= link_to event_path(event), class: "group block bg-white rounded-2xl border border-[var(--color-border)] overflow-hidden hover:shadow-lg transition-shadow" do %>
+          <% if event.cover_image.attached? %>
+            <div class="aspect-[16/9] overflow-hidden bg-[var(--color-muted)]">
+              <%= image_tag event.cover_image, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
+            </div>
+          <% else %>
+            <div class="aspect-[16/9] bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 flex items-center justify-center">
+              <svg class="h-12 w-12 text-[var(--color-primary)]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+          <% end %>
+          <div class="p-5">
+            <div class="flex items-center gap-2 text-xs text-[var(--color-muted-foreground)] mb-2">
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <span><%= event.date.strftime("%d %b %Y") %></span>
+              <% if event.start_time.present? %>
+                <span>&middot; <%= event.start_time.strftime("%l:%M %p").strip %></span>
+              <% end %>
+            </div>
+            <h3 class="text-lg font-bold text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors"><%= event.title %></h3>
+            <% if event.location.present? %>
+              <p class="text-sm text-[var(--color-muted-foreground)] mt-1">
+                <%= event.location %>
+              </p>
+            <% end %>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-sm font-semibold text-[var(--color-foreground)]">
+                <%= event.free? ? "Gratis" : number_to_currency(event.price) %>
+              </span>
+              <% if event.full? %>
+                <span class="text-xs font-medium text-[var(--color-destructive)]">Agotado</span>
+              <% elsif event.capacity.present? %>
+                <span class="text-xs text-[var(--color-muted-foreground)]"><%= event.spots_remaining %> lugares</span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-2xl border border-[var(--color-border)] p-10 text-center mb-16">
+      <p class="text-[var(--color-muted-foreground)]">No hay eventos próximos por el momento. ¡Vuelve pronto!</p>
+    </div>
+  <% end %>
+
+  <% if @past_events.any? %>
+    <div>
+      <h2 class="text-xl font-bold text-[var(--color-foreground)] mb-6">Eventos Pasados</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% @past_events.each do |event| %>
+          <%= link_to event_path(event), class: "group block bg-white rounded-2xl border border-[var(--color-border)] overflow-hidden opacity-80 hover:opacity-100 transition-opacity" do %>
+            <% if event.cover_image.attached? %>
+              <div class="aspect-[16/9] overflow-hidden bg-[var(--color-muted)]">
+                <%= image_tag event.cover_image, class: "w-full h-full object-cover grayscale group-hover:grayscale-0 transition" %>
+              </div>
+            <% end %>
+            <div class="p-5">
+              <div class="flex items-center gap-2 text-xs text-[var(--color-muted-foreground)] mb-2">
+                <span><%= event.date.strftime("%d %b %Y") %></span>
+              </div>
+              <h3 class="text-base font-semibold text-[var(--color-foreground)]"><%= event.title %></h3>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

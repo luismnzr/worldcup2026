@@ -1,0 +1,82 @@
+:root {
+  /* Base palette */
+  --color-obsidian: #1a1a18;
+  --color-charcoal: #2a2a26;
+  --color-warm-gold: #a3946b;
+  --color-parchment: #e8e4de;
+  --color-bone: #f5f2ec;
+
+  /* Semantic colors — light mode */
+  --color-primary: var(--color-warm-gold);
+  --color-primary-foreground: var(--color-obsidian);
+  --color-primary-hover: #8f8158;
+  --color-secondary: var(--color-parchment);
+  --color-secondary-foreground: var(--color-obsidian);
+  --color-accent: var(--color-warm-gold);
+  --color-accent-foreground: var(--color-obsidian);
+  --color-background: var(--color-bone);
+  --color-foreground: var(--color-obsidian);
+  --color-muted: var(--color-parchment);
+  --color-muted-foreground: #6b6760;
+  --color-border: #d9d4cb;
+  --color-destructive: #b84a3e;
+  --color-destructive-foreground: var(--color-bone);
+  --color-success: #4f7a5c;
+  --color-success-foreground: var(--color-bone);
+  --color-warning: #b88a3a;
+  --color-warning-foreground: var(--color-obsidian);
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-obsidian);
+  --color-sidebar: #ffffff;
+  --color-sidebar-foreground: var(--color-obsidian);
+  --color-footer: var(--color-obsidian);
+  --color-footer-foreground: var(--color-bone);
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-sans);
+
+  /* Spacing & Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode — applied when <html> has the `dark` class */
+.dark {
+  --color-primary: var(--color-warm-gold);
+  --color-primary-foreground: var(--color-obsidian);
+  --color-primary-hover: #b8a77d;
+  --color-secondary: var(--color-charcoal);
+  --color-secondary-foreground: var(--color-bone);
+  --color-accent: var(--color-warm-gold);
+  --color-accent-foreground: var(--color-obsidian);
+  --color-background: var(--color-obsidian);
+  --color-foreground: var(--color-bone);
+  --color-muted: var(--color-charcoal);
+  --color-muted-foreground: #9a9388;
+  --color-border: #3a3a35;
+  --color-destructive: #e06b5c;
+  --color-destructive-foreground: var(--color-obsidian);
+  --color-success: #7aa289;
+  --color-success-foreground: var(--color-obsidian);
+  --color-warning: #d4a864;
+  --color-warning-foreground: var(--color-obsidian);
+  --color-card: var(--color-charcoal);
+  --color-card-foreground: var(--color-bone);
+  --color-sidebar: var(--color-obsidian);
+  --color-sidebar-foreground: var(--color-bone);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.55), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}

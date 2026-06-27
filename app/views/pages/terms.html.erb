@@ -1,0 +1,22 @@
+<% content_for(:title) { "Términos y Condiciones" } %>
+
+<div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16">
+  <h1 class="text-3xl font-bold mb-8">Términos y Condiciones</h1>
+
+  <%= render Ui::CardComponent.new do %>
+    <div class="prose max-w-none text-[var(--color-muted-foreground)] space-y-6">
+      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Pedidos y devoluciones</h2>
+      <p>
+        Los pedidos pueden ser cancelados o modificados antes de ser enviados. Una vez enviado el pedido aplican las políticas de devolución indicadas en cada producto. Para productos digitales no aplican devoluciones después de la descarga.
+      </p>
+      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Eventos</h2>
+      <p>
+        Las inscripciones a eventos pueden cancelarse hasta antes de la fecha del evento. Consulta los detalles de cada evento para más información sobre cupos, ubicación y reembolsos.
+      </p>
+      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Suscripciones</h2>
+      <p>
+        Las suscripciones se renuevan automáticamente al final de cada período de facturación. Puedes administrar o cancelar tu suscripción en cualquier momento desde la configuración de tu cuenta.
+      </p>
+    </div>
+  <% end %>
+</div>

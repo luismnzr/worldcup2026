@@ -1,0 +1,99 @@
+<% content_for(:title) { "Configuración de Cuenta" } %>
+
+<div class="mx-auto max-w-2xl px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">Configuración de Cuenta</h1>
+
+  <%= render Ui::CardComponent.new do %>
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "space-y-6" }) do |f| %>
+      <% if resource.errors.any? %>
+        <%= render Ui::AlertComponent.new(variant: :destructive, title: "Por favor corrige los siguientes errores:") do %>
+          <ul class="list-disc list-inside mt-1">
+            <% resource.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        <% end %>
+      <% end %>
+
+      <div>
+        <h2 class="text-lg font-semibold mb-4">Información Personal</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <%= render Ui::InputComponent.new(
+            name: "user[first_name]",
+            label: "Nombre",
+            value: resource.first_name,
+            required: true
+          ) %>
+          <%= render Ui::InputComponent.new(
+            name: "user[last_name]",
+            label: "Apellido",
+            value: resource.last_name,
+            required: true
+          ) %>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-semibold mb-4">Correo electrónico</h2>
+        <%= render Ui::InputComponent.new(
+          name: "user[email]",
+          type: "email",
+          label: "Correo Electrónico",
+          value: resource.email,
+          required: true
+        ) %>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-semibold mb-4">Cambiar Contraseña</h2>
+        <p class="text-sm text-[var(--color-muted-foreground)] mb-4">Déjalo en blanco si no deseas cambiarlo</p>
+        <div class="space-y-4">
+          <%= render Ui::InputComponent.new(
+            name: "user[password]",
+            type: "password",
+            label: "Nueva Contraseña",
+            hint: "Mínimo 6 caracteres",
+            autocomplete: "new-password"
+          ) %>
+          <%= render Ui::InputComponent.new(
+            name: "user[password_confirmation]",
+            type: "password",
+            label: "Confirmar Nueva Contraseña",
+            autocomplete: "new-password"
+          ) %>
+        </div>
+      </div>
+
+      <div class="border-t border-[var(--color-border)] pt-6">
+        <%= render Ui::InputComponent.new(
+          name: "user[current_password]",
+          type: "password",
+          label: "Contraseña Actual",
+          hint: "Requerida para guardar cambios",
+          required: true,
+          autocomplete: "current-password"
+        ) %>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <%= render Ui::ButtonComponent.new(type: "submit") do %>Guardar Cambios<% end %>
+        <%= link_to "Cancelar", profile_path, class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]" %>
+      </div>
+    <% end %>
+  <% end %>
+
+  <div class="mt-8">
+    <%= render Ui::CardComponent.new do %>
+      <h2 class="text-lg font-semibold text-[var(--color-destructive)] mb-2">Eliminar Cuenta</h2>
+      <p class="text-sm text-[var(--color-muted-foreground)] mb-4">
+        Una vez que elimines tu cuenta, todos tus datos serán eliminados permanentemente. Esta acción no se puede deshacer.
+      </p>
+      <%= render Ui::ButtonComponent.new(
+        variant: :destructive,
+        href: registration_path(resource_name),
+        method: :delete,
+        data: { turbo_confirm: "¿Estás seguro? Esta acción no se puede deshacer." }
+      ) do %>Eliminar Mi Cuenta<% end %>
+    <% end %>
+  </div>
+</div>

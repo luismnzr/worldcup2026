@@ -1,0 +1,10 @@
+<% content_for(:page_title) { "Editar Contenido" } %>
+<div class="max-w-3xl">
+  <%= link_to "&larr; Volver".html_safe, admin_member_posts_path,
+        class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] mb-4 inline-block" %>
+
+  <div class="bg-white rounded-xl border border-[var(--color-border)] p-6">
+    <h2 class="text-lg font-semibold mb-6">Editar “<%= @post.title %>”</h2>
+    <%= render "form", member_post: @post %>
+  </div>
+</div>

@@ -1,0 +1,101 @@
+<% content_for(:title) { @event.title } %>
+
+<div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+  <%= link_to "&larr; Volver a Eventos".html_safe, events_path, class: "text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] inline-block mb-6" %>
+
+  <div class="bg-white rounded-2xl border border-[var(--color-border)] overflow-hidden">
+    <% if @event.cover_image.attached? %>
+      <div class="aspect-[16/9] overflow-hidden bg-[var(--color-muted)]">
+        <%= image_tag @event.cover_image, class: "w-full h-full object-cover" %>
+      </div>
+    <% end %>
+
+    <div class="p-6 sm:p-8">
+      <h1 class="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)]"><%= @event.title %></h1>
+
+      <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-[var(--color-muted-foreground)]">
+        <div class="flex items-center gap-2">
+          <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span>
+            <%= @event.date.strftime("%A, %d %B %Y") %>
+            <% if @event.end_date.present? && @event.end_date != @event.date %>
+              — <%= @event.end_date.strftime("%d %B %Y") %>
+            <% end %>
+          </span>
+        </div>
+        <% if @event.start_time.present? %>
+          <div class="flex items-center gap-2">
+            <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>
+              <%= @event.start_time.strftime("%l:%M %p").strip %>
+              <% if @event.end_time.present? %>
+                — <%= @event.end_time.strftime("%l:%M %p").strip %>
+              <% end %>
+            </span>
+          </div>
+        <% end %>
+        <% if @event.location.present? %>
+          <div class="flex items-center gap-2">
+            <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span><%= @event.location %></span>
+          </div>
+        <% end %>
+        <% if @event.capacity.present? %>
+          <div class="flex items-center gap-2">
+            <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span><%= @event.spots_remaining.to_i %> de <%= @event.capacity %> lugares disponibles</span>
+          </div>
+        <% end %>
+      </div>
+
+      <% if @event.description.present? %>
+        <div class="mt-6 prose prose-sm max-w-none text-[var(--color-foreground)] whitespace-pre-line"><%= @event.description %></div>
+      <% end %>
+
+      <div class="mt-8 pt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-[var(--color-muted-foreground)]">Precio</p>
+          <p class="text-2xl font-bold text-[var(--color-foreground)]"><%= @event.free? ? "Gratis" : number_to_currency(@event.price) %></p>
+          <% if @event.in_person_payment_only? && @event.paid? %>
+            <p class="text-xs text-[var(--color-muted-foreground)] mt-1">Pago presencial únicamente</p>
+          <% end %>
+        </div>
+
+        <div class="sm:text-right">
+          <% if @event.past? %>
+            <span class="inline-flex items-center px-4 py-2 rounded-lg bg-[var(--color-muted)] text-sm font-medium text-[var(--color-muted-foreground)]">Evento finalizado</span>
+          <% elsif user_signed_in? %>
+            <% if @registration %>
+              <div class="flex flex-col sm:items-end gap-2">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Ya estás registrado
+                </span>
+                <%= button_to "Cancelar registro", event_registration_path(@registration),
+                      method: :delete,
+                      data: { turbo_confirm: "¿Cancelar tu registro en este evento?" },
+                      class: "text-sm text-[var(--color-destructive)] hover:underline cursor-pointer" %>
+              </div>
+            <% elsif @event.full? %>
+              <span class="inline-flex items-center px-4 py-2 rounded-lg bg-[var(--color-muted)] text-sm font-medium text-[var(--color-muted-foreground)]">Evento agotado</span>
+            <% elsif @event.paid? && !@event.in_person_payment_only? %>
+              <%= button_to checkout_event_path(@event), method: :post,
+                    data: { turbo: false },
+                    class: "inline-flex items-center justify-center px-5 h-11 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" do %>
+                Reservar lugar
+              <% end %>
+            <% else %>
+              <%= button_to event_event_registrations_path(@event), method: :post,
+                    class: "inline-flex items-center justify-center px-5 h-11 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer" do %>
+                Reservar lugar
+              <% end %>
+            <% end %>
+          <% else %>
+            <%= link_to "Inicia sesión para registrarte", new_user_session_path,
+                  class: "inline-flex items-center justify-center px-5 h-11 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

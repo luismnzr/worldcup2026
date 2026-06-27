@@ -1,0 +1,343 @@
+#!/usr/bin/env bash
+#
+# Eclipse — New Client Setup Script
+#
+# Automates the repeatable steps from CLIENT_SETUP_GUIDE.md:
+#   1. Reinitialize git state (disconnect from eclipse-v1 origin)
+#   2. Create Heroku app + PostgreSQL + Redis
+#   3. Set environment variables (prompted)
+#   4. Deploy, migrate, seed, scale worker
+#   5. Configure studio settings via rails runner
+#
+# Expected workflow:
+#   git clone https://github.com/luismnzr/eclipse-v1.git <client-name>
+#   cd <client-name>
+#   bin/setup_client
+#
+# Usage:
+#   bin/setup_client
+#   bin/setup_client --skip-heroku   # skip Heroku creation (app already exists)
+#   bin/setup_client --dry-run       # print commands without executing
+#
+set -euo pipefail
+
+# ── Flags ──────────────────────────────────────────────────────────────
+DRY_RUN=false
+SKIP_HEROKU=false
+
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run)     DRY_RUN=true ;;
+    --skip-heroku) SKIP_HEROKU=true ;;
+    --help|-h)
+      echo "Usage: bin/setup_client [--dry-run] [--skip-heroku]"
+      echo ""
+      echo "  --dry-run       Print commands without executing them"
+      echo "  --skip-heroku   Skip Heroku app/addon creation (app already exists)"
+      exit 0
+      ;;
+    *) echo "Unknown option: $arg"; exit 1 ;;
+  esac
+done
+
+# ── Helpers ────────────────────────────────────────────────────────────
+BOLD="\033[1m"
+GREEN="\033[32m"
+YELLOW="\033[33m"
+CYAN="\033[36m"
+RESET="\033[0m"
+
+step() { echo -e "\n${BOLD}${GREEN}▸ $1${RESET}"; }
+info() { echo -e "  ${CYAN}$1${RESET}"; }
+warn() { echo -e "  ${YELLOW}⚠ $1${RESET}"; }
+
+run() {
+  if $DRY_RUN; then
+    echo -e "  ${YELLOW}[dry-run]${RESET} $*"
+  else
+    "$@"
+  fi
+}
+
+prompt() {
+  local var_name="$1" prompt_text="$2" default="${3:-}"
+  if [ -n "$default" ]; then
+    read -rp "  $prompt_text [$default]: " value
+    eval "$var_name=\"${value:-$default}\""
+  else
+    read -rp "  $prompt_text: " value
+    while [ -z "$value" ]; do
+      read -rp "  $prompt_text (required): " value
+    done
+    eval "$var_name=\"$value\""
+  fi
+}
+
+prompt_optional() {
+  local var_name="$1" prompt_text="$2"
+  read -rp "  $prompt_text (leave blank to skip): " value
+  eval "$var_name=\"$value\""
+}
+
+confirm() {
+  read -rp "  $1 [y/N]: " answer
+  [[ "$answer" =~ ^[Yy]$ ]]
+}
+
+# ── Preflight ──────────────────────────────────────────────────────────
+step "Preflight checks"
+
+if ! $SKIP_HEROKU; then
+  for cmd in heroku git; do
+    if ! command -v "$cmd" &>/dev/null; then
+      echo "Error: '$cmd' is required but not installed." >&2
+      exit 1
+    fi
+  done
+  info "heroku CLI and git found"
+fi
+
+# ── Gather Client Info ─────────────────────────────────────────────────
+step "Gather client information"
+
+echo ""
+echo -e "  ${BOLD}Studio Details${RESET}"
+prompt CLIENT_APP_NAME   "Heroku app name (lowercase, hyphens, e.g. zenflow-studio)"
+prompt STUDIO_NAME       "Studio name (e.g. Zen Flow Studio)"
+prompt STUDIO_EMAIL      "Contact email (e.g. hello@zenflow.com)"
+prompt STUDIO_PHONE      "Phone number (e.g. +52 55 9876 5432)"
+prompt STUDIO_ADDRESS    "Physical address"
+prompt STUDIO_TIMEZONE   "Timezone" "America/Mexico_City"
+prompt STUDIO_CURRENCY   "Currency (mxn, usd, eur, etc.)" "mxn"
+prompt APP_HOST          "Domain (e.g. app.zenflow.com)"
+
+echo ""
+echo -e "  ${BOLD}Stripe${RESET}"
+warn "Create the Stripe account and get keys before continuing."
+warn "Webhook URL: https://$APP_HOST/webhooks/stripe"
+warn "Events: checkout.session.completed, invoice.paid, invoice.payment_failed,"
+warn "        customer.subscription.updated, customer.subscription.deleted"
+echo ""
+prompt STRIPE_SECRET_KEY      "Stripe Secret Key (sk_live_...)"
+prompt STRIPE_PUBLISHABLE_KEY "Stripe Publishable Key (pk_live_...)"
+prompt STRIPE_WEBHOOK_SECRET  "Stripe Webhook Secret (whsec_...)"
+
+echo ""
+echo -e "  ${BOLD}Postmark${RESET}"
+warn "Create a Postmark server for this client first."
+echo ""
+prompt POSTMARK_API_TOKEN "Postmark Server API Token"
+prompt MAILER_FROM        "Sender email address" "$STUDIO_EMAIL"
+
+echo ""
+echo -e "  ${BOLD}Studio Policies${RESET}"
+prompt CANCEL_HOURS      "Cancellation window (hours before class)" "12"
+prompt LATE_FORFEIT      "Late cancel forfeits credit? (true/false)" "true"
+prompt WAITLIST_ENABLED  "Waitlist enabled? (true/false)" "true"
+prompt MAX_WAITLIST      "Max waitlist size per class" "5"
+prompt BOOKING_WINDOW    "Booking window (days in advance)" "14"
+
+echo ""
+echo -e "  ${BOLD}Optional Integrations${RESET}"
+
+prompt_optional AWS_ACCESS_KEY_ID     "AWS Access Key ID (for S3 uploads)"
+prompt_optional AWS_SECRET_ACCESS_KEY "AWS Secret Access Key"
+prompt_optional AWS_BUCKET            "AWS S3 Bucket name"
+prompt_optional AWS_REGION            "AWS Region (default: us-east-1)"
+prompt_optional STORAGE_PREFIX        "Storage prefix (isolate files per client)"
+
+prompt_optional WELLHUB_API_KEY        "Wellhub API Key"
+prompt_optional WELLHUB_WEBHOOK_SECRET "Wellhub Webhook Secret"
+prompt_optional WELLHUB_GYM_ID         "Wellhub Gym ID"
+
+# ── Branding ───────────────────────────────────────────────────────────
+echo ""
+echo -e "  ${BOLD}Branding${RESET}"
+prompt_optional COLOR_PRIMARY "Primary brand color (hex, e.g. #0d9488)"
+
+# ── Summary ────────────────────────────────────────────────────────────
+step "Setup summary"
+echo ""
+echo -e "  App name:     ${BOLD}$CLIENT_APP_NAME${RESET}"
+echo -e "  Studio:       $STUDIO_NAME"
+echo -e "  Domain:       $APP_HOST"
+echo -e "  Timezone:     $STUDIO_TIMEZONE"
+echo -e "  Currency:     $STUDIO_CURRENCY"
+[ -n "${COLOR_PRIMARY:-}" ] && echo -e "  Primary color: $COLOR_PRIMARY"
+echo ""
+
+if ! confirm "Proceed with setup?"; then
+  echo "Aborted."
+  exit 0
+fi
+
+# ── Step 1: Ensure fresh git state ────────────────────────────────────
+step "Step 1: Ensure fresh git state"
+
+# The script operates in the current directory. Expected workflow:
+#   git clone https://github.com/luismnzr/eclipse-v1.git <client-name>
+#   cd <client-name>
+#   bin/setup_client
+CLIENT_DIR="$PWD"
+
+if [ ! -d "$CLIENT_DIR/.git" ]; then
+  warn "Not a git repo. Initializing..."
+  run git init
+  run git add .
+  run git commit -m "Initial commit — Eclipse base for $STUDIO_NAME"
+else
+  current_origin=$(git config --get remote.origin.url 2>/dev/null || echo "")
+  if [[ "$current_origin" == *"eclipse-v1"* ]]; then
+    warn "git remote 'origin' still points at eclipse-v1: $current_origin"
+    if confirm "Reinitialize git history for this client? (removes .git, runs git init)"; then
+      if ! $DRY_RUN; then
+        rm -rf .git
+        git init
+        git add .
+        git commit -m "Initial commit — Eclipse base for $STUDIO_NAME"
+      fi
+      info "Fresh repo initialized"
+    else
+      warn "Keeping existing git history — remember to change 'origin' manually"
+    fi
+  else
+    info "Git state looks client-specific, leaving alone"
+  fi
+fi
+
+# ── Step 2: Create Heroku App ─────────────────────────────────────────
+if ! $SKIP_HEROKU; then
+  step "Step 2: Create Heroku app"
+  run heroku create "$CLIENT_APP_NAME"
+  run heroku addons:create heroku-postgresql:essential-0 -a "$CLIENT_APP_NAME"
+  run heroku addons:create heroku-redis:mini -a "$CLIENT_APP_NAME"
+  run heroku buildpacks:set heroku/ruby -a "$CLIENT_APP_NAME"
+  info "Heroku app created with PostgreSQL + Redis"
+fi
+
+# ── Step 4: Environment Variables ──────────────────────────────────────
+step "Step 4: Configure environment variables"
+
+SECRET_KEY_BASE="placeholder"
+if ! $DRY_RUN && command -v rails &>/dev/null; then
+  SECRET_KEY_BASE=$(rails secret 2>/dev/null || openssl rand -hex 64)
+fi
+
+# Note: Eclipse doesn't use Rails encrypted credentials — all secrets come from
+# ENV vars — so RAILS_MASTER_KEY is intentionally not set.
+required_vars=(
+  "RAILS_ENV=production"
+  "SECRET_KEY_BASE=$SECRET_KEY_BASE"
+  "APP_HOST=$APP_HOST"
+  "STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY"
+  "STRIPE_PUBLISHABLE_KEY=$STRIPE_PUBLISHABLE_KEY"
+  "STRIPE_WEBHOOK_SECRET=$STRIPE_WEBHOOK_SECRET"
+  "POSTMARK_API_TOKEN=$POSTMARK_API_TOKEN"
+  "MAILER_FROM_ADDRESS=$MAILER_FROM"
+)
+
+run heroku config:set "${required_vars[@]}" -a "$CLIENT_APP_NAME"
+
+# Optional vars — only set if provided
+optional_vars=""
+[ -n "${AWS_ACCESS_KEY_ID:-}" ]     && optional_vars+="AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID "
+[ -n "${AWS_SECRET_ACCESS_KEY:-}" ] && optional_vars+="AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY "
+[ -n "${AWS_BUCKET:-}" ]            && optional_vars+="AWS_BUCKET=$AWS_BUCKET "
+[ -n "${AWS_REGION:-}" ]            && optional_vars+="AWS_REGION=$AWS_REGION "
+[ -n "${STORAGE_PREFIX:-}" ]        && optional_vars+="STORAGE_PREFIX=$STORAGE_PREFIX "
+[ -n "${WELLHUB_API_KEY:-}" ]       && optional_vars+="WELLHUB_API_KEY=$WELLHUB_API_KEY "
+[ -n "${WELLHUB_WEBHOOK_SECRET:-}" ] && optional_vars+="WELLHUB_WEBHOOK_SECRET=$WELLHUB_WEBHOOK_SECRET "
+[ -n "${WELLHUB_GYM_ID:-}" ]        && optional_vars+="WELLHUB_GYM_ID=$WELLHUB_GYM_ID "
+
+if [ -n "$optional_vars" ]; then
+  run heroku config:set $optional_vars -a "$CLIENT_APP_NAME"
+fi
+
+info "Environment variables set"
+
+# ── Step 5: Deploy ─────────────────────────────────────────────────────
+step "Step 5: Deploy"
+run heroku git:remote -a "$CLIENT_APP_NAME" -r "$CLIENT_APP_NAME"
+run git push "$CLIENT_APP_NAME" main
+info "Deploy triggered (Procfile release phase runs db:migrate)"
+
+run heroku run rails db:seed -a "$CLIENT_APP_NAME"
+run heroku ps:scale worker=1 -a "$CLIENT_APP_NAME"
+info "Database seeded + Sidekiq worker started"
+
+# ── Step 6: Branding ──────────────────────────────────────────────────
+if [ -n "${COLOR_PRIMARY:-}" ]; then
+  step "Step 6: Update theme.css with brand colors"
+
+  THEME_FILE="$CLIENT_DIR/app/assets/stylesheets/theme.css"
+  if [ -f "$THEME_FILE" ] && ! $DRY_RUN; then
+    # Derive hover color (darken primary by ~10%)
+    # Simple approach: replace the default primary colors
+    sed -i "s/--color-primary: #6366f1;/--color-primary: $COLOR_PRIMARY;/" "$THEME_FILE"
+    info "Updated --color-primary to $COLOR_PRIMARY in theme.css"
+    warn "Review theme.css to adjust --color-primary-hover and --color-accent manually"
+  else
+    info "[dry-run] Would update --color-primary in theme.css to $COLOR_PRIMARY"
+  fi
+fi
+
+# ── Step 7: Studio Settings ───────────────────────────────────────────
+step "Step 7: Configure studio settings"
+
+SETTINGS_SCRIPT=$(cat <<RUBY
+StudioSetting.set("studio_name", "$STUDIO_NAME")
+StudioSetting.set("studio_email", "$STUDIO_EMAIL")
+StudioSetting.set("studio_phone", "$STUDIO_PHONE")
+StudioSetting.set("studio_address", "$STUDIO_ADDRESS")
+StudioSetting.set("studio_timezone", "$STUDIO_TIMEZONE")
+StudioSetting.set("currency", "$STUDIO_CURRENCY")
+StudioSetting.set("cancellation_window_hours", "$CANCEL_HOURS")
+StudioSetting.set("late_cancel_forfeit_credit", "$LATE_FORFEIT")
+StudioSetting.set("waitlist_enabled", "$WAITLIST_ENABLED")
+StudioSetting.set("max_waitlist_size", "$MAX_WAITLIST")
+StudioSetting.set("booking_window_days", "$BOOKING_WINDOW")
+RUBY
+)
+
+# Enable Wellhub if credentials were provided
+if [ -n "${WELLHUB_API_KEY:-}" ]; then
+  SETTINGS_SCRIPT+=$'\n'"StudioSetting.set(\"wellhub_enabled\", \"true\")"
+fi
+
+run heroku run rails runner "$SETTINGS_SCRIPT" -a "$CLIENT_APP_NAME"
+info "Studio settings configured"
+
+# ── Done ───────────────────────────────────────────────────────────────
+step "Setup complete!"
+echo ""
+echo -e "  ${BOLD}Next steps (manual):${RESET}"
+echo ""
+echo "  1. Log in at https://$APP_HOST as admin@eclipse.dev / password"
+echo "     → Change the admin password immediately"
+echo ""
+echo "  2. Replace branding files:"
+echo "     → public/icon.png (512x512)"
+echo "     → public/icon.svg"
+echo "     → Optionally update the navbar logo in app/views/shared/_navbar.html.erb"
+if [ -n "${COLOR_PRIMARY:-}" ]; then
+  echo "     → Review theme.css — adjust --color-primary-hover and --color-accent"
+fi
+echo ""
+echo "  3. Configure DNS:"
+echo "     → heroku domains:add $APP_HOST -a $CLIENT_APP_NAME"
+echo "     → Add CNAME record pointing to Heroku DNS target"
+echo "     → Add Postmark DKIM + Return-Path DNS records"
+echo "     → heroku certs:auto:enable -a $CLIENT_APP_NAME"
+echo ""
+echo "  4. Update Stripe webhook URL to: https://$APP_HOST/webhooks/stripe"
+echo ""
+echo "  5. Set up classes, teachers, packages, and subscription plans via /admin"
+echo ""
+if [ -n "${WELLHUB_API_KEY:-}" ]; then
+  echo "  6. Send Wellhub the webhook URL: https://$APP_HOST/webhooks/wellhub"
+  echo "     → Map categories in admin panel (Settings > Wellhub)"
+  echo ""
+fi
+echo -e "  ${GREEN}App: https://$APP_HOST${RESET}"
+echo -e "  ${GREEN}Admin: https://$APP_HOST/admin${RESET}"
+echo ""

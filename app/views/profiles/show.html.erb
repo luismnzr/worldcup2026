@@ -1,0 +1,119 @@
+<% content_for(:title) { "Mi Perfil" } %>
+
+<div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center justify-between gap-4 mb-6">
+    <div class="flex items-center gap-4">
+      <div class="h-14 w-14 rounded-2xl bg-[var(--color-primary)] flex items-center justify-center">
+        <span class="text-xl font-bold text-white"><%= @user.first_name[0] %><%= @user.last_name[0] %></span>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-[var(--color-foreground)]"><%= @user.full_name %></h1>
+        <p class="text-sm text-[var(--color-muted-foreground)]"><%= @user.email %></p>
+      </div>
+    </div>
+    <%= link_to edit_user_registration_path,
+          class: "inline-flex items-center justify-center h-9 px-4 text-sm font-medium text-[var(--color-foreground)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-muted)] transition-colors" do %>
+      Editar perfil
+    <% end %>
+  </div>
+
+  <%= render "tabs" %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Membresía -->
+    <div class="bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] rounded-2xl p-6 text-white">
+      <p class="text-sm font-medium text-white/70 mb-3">Membresía</p>
+      <% if @user.has_active_subscription? %>
+        <p class="text-xl font-bold"><%= @user.user_subscription.subscription_plan.name %></p>
+        <p class="text-sm text-white/70 mt-1">
+          Activa
+          <% if @user.user_subscription.current_period_end.present? %>
+            &middot; renueva el <%= l(@user.user_subscription.current_period_end.to_date, format: "%d/%m/%Y") %>
+          <% end %>
+        </p>
+        <div class="mt-4">
+          <%= link_to "Administrar →", profile_subscription_path, class: "text-sm text-white underline" %>
+        </div>
+      <% else %>
+        <p class="text-xl font-bold">Sin membresía activa</p>
+        <p class="text-sm text-white/70 mt-1">Suscríbete para acceder a contenido exclusivo.</p>
+        <div class="mt-4">
+          <%= link_to "Ver planes →", subscription_plans_path, class: "text-sm text-white underline" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Próximos eventos -->
+    <div class="bg-white rounded-2xl border border-[var(--color-border)]">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
+        <h3 class="font-semibold text-[var(--color-foreground)]">Próximos eventos</h3>
+        <%= link_to "Ver todos", profile_events_path, class: "text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] font-medium" %>
+      </div>
+      <% if @upcoming_events.any? %>
+        <ul class="divide-y divide-[var(--color-border)]">
+          <% @upcoming_events.each do |reg| %>
+            <li class="flex items-center gap-4 px-5 py-3">
+              <div class="flex-shrink-0 text-center w-12">
+                <p class="text-xs text-[var(--color-muted-foreground)] uppercase"><%= l(reg.event.date, format: "%b") %></p>
+                <p class="text-sm font-semibold text-[var(--color-foreground)]"><%= reg.event.date.day %></p>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-[var(--color-foreground)] truncate"><%= reg.event.title %></p>
+                <% if reg.event.start_time %>
+                  <p class="text-xs text-[var(--color-muted-foreground)]"><%= reg.event.start_time.strftime("%l:%M %p").strip %></p>
+                <% end %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="px-5 py-10 text-center">
+          <p class="text-sm text-[var(--color-muted-foreground)]">No tienes eventos próximos.</p>
+          <%= link_to "Ver eventos", events_path, class: "mt-2 inline-flex text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Pedidos recientes -->
+    <div class="bg-white rounded-2xl border border-[var(--color-border)] lg:col-span-2">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
+        <h3 class="font-semibold text-[var(--color-foreground)]">Pedidos recientes</h3>
+        <%= link_to "Ver todos", profile_orders_path, class: "text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] font-medium" %>
+      </div>
+      <% if @recent_orders.any? %>
+        <ul class="divide-y divide-[var(--color-border)]">
+          <% @recent_orders.each do |order| %>
+            <li>
+              <%= link_to profile_order_path(order), class: "flex items-center gap-4 px-5 py-3 hover:bg-[var(--color-muted)]/40 transition-colors" do %>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-[var(--color-foreground)] truncate">
+                    Pedido #<%= order.id %>
+                    <span class="text-[var(--color-muted-foreground)] font-normal">— <%= order.order_items.size %> artículos</span>
+                  </p>
+                  <p class="text-xs text-[var(--color-muted-foreground)]"><%= l(order.created_at, format: "%d/%m/%Y") %></p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm font-semibold"><%= number_to_currency(order.total) %></p>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                              <%= case order.shipping_status
+                                  when 'unfulfilled' then 'bg-amber-50 text-amber-700'
+                                  when 'fulfilled'   then 'bg-blue-50 text-blue-700'
+                                  when 'shipped'     then 'bg-violet-50 text-violet-700'
+                                  when 'delivered'   then 'bg-emerald-50 text-emerald-700'
+                                  end %>">
+                    <%= t_shipping_status(order.shipping_status) %>
+                  </span>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="px-5 py-10 text-center">
+          <p class="text-sm text-[var(--color-muted-foreground)]">Aún no tienes pedidos.</p>
+          <%= link_to "Ir a la tienda", products_path, class: "mt-2 inline-flex text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

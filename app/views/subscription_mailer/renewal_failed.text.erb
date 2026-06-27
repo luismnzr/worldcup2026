@@ -1,0 +1,11 @@
+Pago Fallido
+
+Hola <%= @user.first_name %>, no pudimos procesar el pago de tu suscripción.
+
+Plan: <%= @plan.name %>
+Monto: <%= format_currency(@plan.price) %>/<%= @plan.interval_noun %>
+Estado: Pago Fallido
+
+Por favor actualiza tu método de pago para continuar tu suscripción y evitar perder acceso a las clases.
+
+Actualizar método de pago: <%= profile_billing_url %>
