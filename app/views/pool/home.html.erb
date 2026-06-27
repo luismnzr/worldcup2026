@@ -21,7 +21,7 @@
         <%= link_to "Crear cuenta", new_user_registration_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-[var(--color-primary)] bg-white rounded-lg hover:bg-gray-50 transition-colors shadow-lg" %>
         <%= link_to "Iniciar sesión", new_user_session_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-white border border-white/30 rounded-lg hover:bg-white/10 transition-colors" %>
       <% end %>
-      <%= link_to "Ver bracket", bracket_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-white border border-white/30 rounded-lg hover:bg-white/10 transition-colors" %>
+      <%= link_to "Ver partidos", bracket_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-white border border-white/30 rounded-lg hover:bg-white/10 transition-colors" %>
     </div>
   </div>
 </section>
@@ -33,7 +33,7 @@
   <section>
     <div class="flex items-center justify-between mb-3">
       <h2 class="text-lg font-semibold text-[var(--color-foreground)]">Próximos partidos</h2>
-      <%= link_to "Tabla", leaderboard_path, class: "text-sm font-medium text-[var(--color-primary)] hover:underline" %>
+      <%= link_to "Leaderboard", leaderboard_path, class: "text-sm font-medium text-[var(--color-primary)] hover:underline" %>
     </div>
     <% if @next_matches.any? %>
       <div class="space-y-2">

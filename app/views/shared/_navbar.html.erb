@@ -12,9 +12,9 @@
 
         <!-- Desktop Nav -->
         <nav class="hidden md:flex items-center gap-1">
-          <%= link_to "Predicciones", predictions_path, class: "px-3 py-2 text-sm font-medium rounded-lg transition-colors #{current_page?(predictions_path) ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-muted)]'}" %>
-          <%= link_to "Tabla", leaderboard_path, class: "px-3 py-2 text-sm font-medium rounded-lg transition-colors #{current_page?(leaderboard_path) ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-muted)]'}" %>
-          <%= link_to "Bracket", bracket_path, class: "px-3 py-2 text-sm font-medium rounded-lg transition-colors #{current_page?(bracket_path) ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-muted)]'}" %>
+          <%= link_to "Mis Predicciones", predictions_path, class: "px-3 py-2 text-sm font-medium rounded-lg transition-colors #{current_page?(predictions_path) ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-muted)]'}" %>
+          <%= link_to "Leaderboard", leaderboard_path, class: "px-3 py-2 text-sm font-medium rounded-lg transition-colors #{current_page?(leaderboard_path) ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-muted)]'}" %>
+          <%= link_to "Partidos", bracket_path, class: "px-3 py-2 text-sm font-medium rounded-lg transition-colors #{current_page?(bracket_path) ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/5' : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-muted)]'}" %>
         </nav>
       </div>
 
@@ -51,9 +51,9 @@
   <!-- Mobile menu -->
   <div class="hidden md:hidden border-t border-[var(--color-border)] bg-[var(--color-background)]" data-mobile-menu-target="menu">
     <div class="px-4 py-4 space-y-1">
-      <%= link_to "Predicciones", predictions_path, class: "block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--color-muted)]" %>
-      <%= link_to "Tabla", leaderboard_path, class: "block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--color-muted)]" %>
-      <%= link_to "Bracket", bracket_path, class: "block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--color-muted)]" %>
+      <%= link_to "Mis Predicciones", predictions_path, class: "block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--color-muted)]" %>
+      <%= link_to "Leaderboard", leaderboard_path, class: "block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--color-muted)]" %>
+      <%= link_to "Partidos", bracket_path, class: "block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--color-muted)]" %>
       <div class="border-t border-[var(--color-border)] my-2 pt-2">
         <% if user_signed_in? %>
           <%= link_to "Mi Perfil", profile_path, class: "block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--color-muted)]" %>

@@ -1,12 +1,12 @@
-<% content_for(:title) { "Predicciones" } %>
+<% content_for(:title) { "Mis Predicciones" } %>
 
 <div class="mx-auto max-w-2xl px-4 sm:px-6 py-6 sm:py-10">
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-[var(--color-foreground)]">Tus predicciones</h1>
+      <h1 class="text-2xl font-bold text-[var(--color-foreground)]">Mis Predicciones</h1>
       <p class="text-sm text-[var(--color-muted-foreground)] mt-1">Elige quién avanza en cada partido abierto.</p>
     </div>
-    <%= link_to "Tabla", leaderboard_path, class: "text-sm font-medium text-[var(--color-primary)] hover:underline" %>
+    <%= link_to "Leaderboard", leaderboard_path, class: "text-sm font-medium text-[var(--color-primary)] hover:underline" %>
   </div>
 
   <% if @open_matches.any? %>

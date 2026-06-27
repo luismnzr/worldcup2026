@@ -43,6 +43,20 @@
       </div>
     </div>
 
+    <!-- Integraciones -->
+    <div class="bg-white rounded-xl border border-[var(--color-border)] p-6">
+      <h3 class="text-sm font-semibold text-[var(--color-foreground)] uppercase tracking-wider mb-4">Resultados (API)</h3>
+      <div>
+        <label for="settings_football_data_api_token" class="block text-sm font-medium text-[var(--color-foreground)] mb-1">football-data.org · API token</label>
+        <input type="password" name="settings[football_data_api_token]" id="settings_football_data_api_token" value="<%= StudioSetting.get('football_data_api_token') %>" autocomplete="off" placeholder="Pega tu token aquí" class="w-full h-10 px-3 rounded-lg border border-[var(--color-border)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]">
+        <p class="text-xs text-[var(--color-muted-foreground)] mt-1">
+          Saca una key gratis en
+          <a href="https://www.football-data.org/client/register" target="_blank" rel="noopener" class="text-[var(--color-primary)] hover:underline">football-data.org</a>.
+          Con esto los resultados se sincronizan solos cada 10 min. Si la variable de entorno <code class="font-mono">FOOTBALL_DATA_API_TOKEN</code> está definida, esa tiene prioridad. Déjalo vacío para capturar a mano.
+        </p>
+      </div>
+    </div>
+
     <div class="flex items-center gap-3">
       <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer">Guardar Configuración</button>
     </div>

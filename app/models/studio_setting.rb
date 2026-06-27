@@ -8,7 +8,8 @@ class StudioSetting < ApplicationRecord
     "studio_address" => "",
     "studio_schedule" => "Lun - Vie\n9:00 AM - 7:00 PM",
     "studio_timezone" => "America/Mexico_City",
-    "currency" => "mxn"
+    "currency" => "mxn",
+    "football_data_api_token" => ""
   }.freeze
 
   def self.get(key)

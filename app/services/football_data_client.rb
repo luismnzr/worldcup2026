@@ -10,8 +10,14 @@ class FootballDataClient
 
   class Error < StandardError; end
 
-  def initialize(token: ENV["FOOTBALL_DATA_API_TOKEN"])
-    @token = token
+  def initialize(token: nil)
+    @token = token || self.class.resolve_token
+  end
+
+  # ENV manda (más seguro en prod); si no, cae al valor de Settings (cómodo
+  # para pegarlo desde el admin sin redeploy).
+  def self.resolve_token
+    ENV["FOOTBALL_DATA_API_TOKEN"].presence || StudioSetting.get("football_data_api_token").presence
   end
 
   def configured?
