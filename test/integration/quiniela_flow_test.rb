@@ -58,13 +58,13 @@ class QuinielaFlowTest < ActionDispatch::IntegrationTest
     patch record_result_admin_match_path(source), params: { match: { home_score: 2, away_score: 1, advancing_team: "México" } }
     assert_redirected_to admin_matches_path
 
-    # Puntos otorgados (r32 = 1) + bonus de marcador exacto (2) = 3.
-    assert_equal 3, prediction.reload.points_awarded
+    # Puntos otorgados (r32 = 1) + bonus de marcador exacto (1) = 2.
+    assert_equal 2, prediction.reload.points_awarded
     # Propagación: México avanza al partido 90.
     assert_equal "México", dependent.reload.home_team
     # Leaderboard incluye al jugador inscrito.
     rankings = LeaderboardService.rankings(@tournament)
     assert_equal player, rankings.first.user
-    assert_equal 3, rankings.first.points
+    assert_equal 2, rankings.first.points
   end
 end

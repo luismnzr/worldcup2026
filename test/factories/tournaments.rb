@@ -4,6 +4,6 @@ FactoryBot.define do
     entry_fee { 50 }
     currency { "MXN" }
     prize_description { "Trofeo de campeón; el último lugar paga los tacos." }
-    exact_score_bonus { 2 }
+    exact_score_bonus { 1 }
   end
 end
