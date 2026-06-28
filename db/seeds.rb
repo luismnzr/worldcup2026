@@ -132,6 +132,12 @@ puts "  Actualizados: #{updated}"
 puts "  Total:        #{Match.count} partidos"
 puts "  Por ronda:    " + Match.group(:stage).count.to_s
 
+# Premio por defecto (editable en el admin). Solo se pone si aún no hay uno.
+tournament = Tournament.current
+if tournament.prize_description.blank?
+  tournament.update!(prize_description: "🍕 Pizza Party — pizzas y refrescos/cheves para ti y tus amigxs")
+end
+
 # ---------------------------------------------------------------------------
 # Cuentas y torneo de demo — SOLO fuera de producción. Idempotente.
 # Para que cualquier entorno de preview tenga un admin con el que entrar.
