@@ -4,7 +4,9 @@ development:
 test:
   adapter: test
 
+<%# Con REDIS_URL usa Redis (multi-instancia); sin él, async in-process
+   (sirve para un deploy gratis de una sola instancia). %>
 production:
-  adapter: redis
-  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
+  adapter: <%= ENV["REDIS_URL"].present? ? "redis" : "async" %>
+  url: <%= ENV.fetch("REDIS_URL", "redis://localhost:6379/1") %>
   channel_prefix: worldcup_production
