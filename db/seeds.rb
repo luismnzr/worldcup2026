@@ -139,32 +139,44 @@ if tournament.prize_description.blank?
 end
 
 # ---------------------------------------------------------------------------
-# Cuentas y torneo de demo — SOLO fuera de producción. Idempotente.
-# Para que cualquier entorno de preview tenga un admin con el que entrar.
+# Admin del torneo (Louie-G). Idempotente.
+# Contraseña: en producción se toma de ENV["ADMIN_PASSWORD"] (no se hardcodea);
+# en dev/test cae a "password". Queda inscrito para poder jugar también.
 # ---------------------------------------------------------------------------
+admin_email = "luismnzr@gmail.com"
+admin_password = ENV["ADMIN_PASSWORD"].presence || (Rails.env.production? ? nil : "password")
+
+admin = User.find_or_initialize_by(email: admin_email)
+if admin.new_record?
+  if admin_password
+    admin.assign_attributes(
+      first_name: "Louie", last_name: "G", display_name: "Louie-G", role: :admin,
+      password: admin_password, password_confirmation: admin_password
+    )
+    admin.save!
+    puts "Admin creado: #{admin_email}"
+  else
+    puts "⚠️  Define ADMIN_PASSWORD para crear el admin (#{admin_email}) en producción."
+  end
+else
+  admin.update!(display_name: "Louie-G", role: :admin)
+end
+
+# Inscripción pagada del admin (organizador) para que también juegue.
+if admin.persisted?
+  entry = Entry.find_or_initialize_by(user: admin, tournament: tournament)
+  entry.update!(status: :paid, amount: tournament.entry_fee, paid_at: Time.current) unless entry.paid?
+end
+
+# Jugador de demo extra — solo fuera de producción, para probar el leaderboard.
 unless Rails.env.production?
-  tournament = Tournament.current
-
-  admin = User.find_or_initialize_by(email: "admin@quiniela.mx")
-  admin.assign_attributes(
-    first_name: "Admin", last_name: "Quiniela", display_name: "Admin",
-    role: :admin, password: "password", password_confirmation: "password"
-  )
-  admin.save!
-
   player = User.find_or_initialize_by(email: "jugador@quiniela.mx")
   player.assign_attributes(
-    first_name: "Juan", last_name: "Pérez", display_name: "Juanito",
+    first_name: "Demo", last_name: "Jugador", display_name: "Demo",
     role: :student, password: "password", password_confirmation: "password"
   )
   player.save!
-
-  # Inscripción pagada del jugador de demo, para probar predicciones/leaderboard.
-  entry = Entry.find_or_initialize_by(user: player, tournament: tournament)
-  entry.update!(status: :paid, amount: tournament.entry_fee, paid_at: Time.current) unless entry.paid?
-
-  puts ""
-  puts "Cuentas de demo (no-producción):"
-  puts "  Admin:    admin@quiniela.mx / password"
-  puts "  Jugador:  jugador@quiniela.mx / password (inscripción pagada)"
+  demo_entry = Entry.find_or_initialize_by(user: player, tournament: tournament)
+  demo_entry.update!(status: :paid, amount: tournament.entry_fee, paid_at: Time.current) unless demo_entry.paid?
+  puts "Cuentas dev: #{admin_email} / password (admin) · jugador@quiniela.mx / password"
 end
