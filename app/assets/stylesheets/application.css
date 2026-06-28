@@ -319,23 +319,32 @@ html.dark {
 .tb-third-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-muted-foreground); margin-bottom: 6px; }
 .tb-third .tb-card { width: 160px; margin: 0 auto; }
 
-/* Bracket — vista por rondas (tabs) */
+/* Bracket — vista por rondas (tabs): grid de 2 columnas, tarjetas grandes */
 .bracket-grid {
   display: grid;
-  gap: 12px;
+  gap: 16px;
   grid-template-columns: 1fr;
 }
-@media (min-width: 640px) { .bracket-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1024px) { .bracket-grid { grid-template-columns: repeat(3, 1fr); } }
-/* En el grid las tarjetas llenan su celda (sin el hueco de conectores del árbol). */
-.bracket-grid .tb-card { width: 100%; }
+@media (min-width: 768px) { .bracket-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* Tarjetas más grandes y legibles (estilo Mis Predicciones). El árbol mantiene
+   su tamaño compacto: estos overrides están acotados a .bracket-grid. */
+.bracket-grid .tb-card { width: 100%; padding: 16px 18px; border-radius: var(--radius-lg); font-size: 15px; }
+.bracket-grid .tb-card-top { margin-bottom: 8px; }
+.bracket-grid .tb-card-status,
+.bracket-grid .tb-card-num { font-size: 12px; }
+.bracket-grid .tb-team { padding: 7px 0; gap: 10px; }
+.bracket-grid .tb-team-name { font-size: 16px; }
+.bracket-grid .tb-team-score { font-size: 16px; min-width: 16px; }
+.bracket-grid .tb-card-foot { margin-top: 10px; padding-top: 8px; font-size: 12px; }
+
 .bracket-grid-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-muted-foreground);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 /* Pie de tarjeta del bracket: sede + pick/acierto del usuario */
