@@ -1,6 +1,7 @@
 <%#
-  Tarjeta de partido para el bracket. locals: match, (opcional) compact
+  Tarjeta de partido para el bracket. locals: match
 %>
+<%= link_to match_path(match), class: "tb-card-link" do %>
 <div class="tb-card">
   <div class="tb-card-top">
     <span class="tb-card-status">
@@ -42,3 +43,4 @@
     </div>
   <% end %>
 </div>
+<% end %>

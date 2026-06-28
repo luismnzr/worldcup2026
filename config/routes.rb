@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   get "terms", to: "pages#terms"
 
   get "bracket", to: "bracket#show", as: :bracket
+  get "partidos/:id", to: "matches#show", as: :match
   get "tabla", to: "leaderboard#index", as: :leaderboard
 
   get "predicciones", to: "predictions#index", as: :predictions

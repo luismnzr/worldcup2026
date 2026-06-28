@@ -1,0 +1,82 @@
+<% content_for(:title) { "#{@match.display_home} vs #{@match.display_away}" } %>
+
+<div class="mx-auto max-w-2xl px-4 sm:px-6 pt-8 sm:pt-10 pb-10 space-y-6">
+  <%= link_to "← Partidos", bracket_path, class: "inline-block text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]" %>
+
+  <%# ── Cabecera del partido ── %>
+  <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-5 sm:p-6 shadow-[var(--shadow-sm)]">
+    <div class="flex items-center justify-between mb-4">
+      <%= render Ui::BadgeComponent.new(text: @match.stage_name, variant: :secondary) %>
+      <span class="text-xs text-[var(--color-muted-foreground)]">
+        <% if @match.status == "finished" %>Finalizado<% elsif @match.kickoff_at.present? %><%= @match.kickoff_at.in_time_zone(StudioSetting.studio_timezone).strftime("%d/%m · %H:%M") %><% end %>
+      </span>
+    </div>
+
+    <% [ [ @match.display_home, @match.home_team, @match.home_score ],
+         [ @match.display_away, @match.away_team, @match.away_score ] ].each do |label, team, score| %>
+      <% win = team.present? && @match.advancing_team == team %>
+      <div class="flex items-center justify-between py-2 <%= "font-bold text-[var(--color-primary)]" if win %>">
+        <span class="text-lg"><%= team_label(label) %></span>
+        <span class="text-lg tabular-nums"><%= score %></span>
+      </div>
+    <% end %>
+
+    <% if @match.venue.present? %>
+      <p class="text-xs text-[var(--color-muted-foreground)] mt-3">📍 <%= @match.venue %></p>
+    <% end %>
+  </div>
+
+  <%# ── Predicciones de los jugadores ── %>
+  <div>
+    <h2 class="text-lg font-bold text-[var(--color-foreground)] mb-3">Predicciones</h2>
+
+    <% if !@revealed %>
+      <%= render Ui::CardComponent.new do %>
+        <div class="text-center py-6">
+          <p class="text-2xl mb-1">🔒</p>
+          <p class="text-sm font-medium text-[var(--color-foreground)]">Se revelan cuando cierre el partido</p>
+          <p class="text-xs text-[var(--color-muted-foreground)] mt-1">
+            Para que nadie copie. Ya predijeron <%= @prediction_count %> jugador<%= "es" if @prediction_count != 1 %>.
+          </p>
+        </div>
+      <% end %>
+    <% elsif @predictions.empty? %>
+      <%= render Ui::CardComponent.new do %>
+        <p class="text-center text-sm text-[var(--color-muted-foreground)] py-6">Nadie predijo este partido.</p>
+      <% end %>
+    <% else %>
+      <%# Conteo por equipo %>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <% @tally.sort_by { |_, n| -n }.each do |pick, n| %>
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] px-3 py-1 text-sm">
+            <%= team_label(pick) %> <span class="font-semibold text-[var(--color-foreground)]"><%= n %></span>
+          </span>
+        <% end %>
+      </div>
+
+      <%# Lista de jugadores %>
+      <div class="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] divide-y divide-[var(--color-border)]">
+        <% @predictions.each do |prediction| %>
+          <div class="flex items-center justify-between px-4 py-3 <%= "bg-[var(--color-primary)]/5" if prediction.user == current_user %>">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="h-8 w-8 flex-shrink-0 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-xs font-semibold text-white">
+                <%= prediction.user.display_name_or_default[0]&.upcase %>
+              </span>
+              <span class="text-sm font-medium text-[var(--color-foreground)] truncate"><%= prediction.user.display_name_or_default %></span>
+            </div>
+            <div class="flex items-center gap-3 flex-shrink-0">
+              <span class="text-sm"><%= team_label(prediction.advancing_pick) %></span>
+              <% if @match.status == "finished" && @match.advancing_team.present? %>
+                <% if prediction.correct? %>
+                  <span class="text-sm font-bold text-[var(--color-success)]">✓ +<%= prediction.points_awarded %></span>
+                <% else %>
+                  <span class="text-sm text-[var(--color-destructive)]">✗</span>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
