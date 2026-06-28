@@ -1,32 +1,7 @@
 <% content_for(:title) { "Crear Cuenta" } %>
 
-<div class="flex min-h-[calc(100vh-4rem)]">
-  <!-- Left panel: gradient brand -->
-  <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)] via-[var(--color-primary)] to-[var(--color-accent)]"></div>
-    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMSIvPjwvZz48L2c+PC9zdmc+')] opacity-40"></div>
-    <div class="relative flex flex-col justify-center px-12 lg:px-16">
-      <div class="flex items-center gap-2 mb-8">
-        <%= brand_mark(box: "h-10 w-10", emoji: "text-2xl", wrapper: "bg-white/20") %>
-        <span class="text-2xl font-bold text-white"><%= StudioSetting.get("studio_name") %></span>
-      </div>
-      <h2 class="text-3xl font-bold text-white">Arma tu quiniela<br>del Mundial 2026</h2>
-      <p class="mt-4 text-white/70 max-w-sm">Crea tu cuenta, inscríbete al torneo y compite contra tus amigos partido a partido.</p>
-      <div class="mt-12 flex items-center gap-4">
-        <div class="flex -space-x-2">
-          <div class="h-8 w-8 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-xs font-medium text-white">A</div>
-          <div class="h-8 w-8 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-xs font-medium text-white">M</div>
-          <div class="h-8 w-8 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-xs font-medium text-white">S</div>
-          <div class="h-8 w-8 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-xs font-medium text-white">+</div>
-        </div>
-        <p class="text-sm text-white/70">Únete <%= User.students.count %>+ miembros ya practicando</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Right panel: form -->
-  <div class="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
-    <div class="w-full max-w-sm">
+<div class="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 sm:px-6 lg:px-8">
+  <div class="w-full max-w-sm">
       <div class="mb-8">
         <h1 class="text-2xl font-bold text-[var(--color-foreground)]">Crea tu cuenta</h1>
         <p class="text-[var(--color-muted-foreground)] mt-2 text-sm">¿Ya tienes cuenta? <%= link_to "Iniciar sesión", new_user_session_path, class: "font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]" %></p>
@@ -86,6 +61,5 @@
           </p>
         </div>
       <% end %>
-    </div>
   </div>
 </div>

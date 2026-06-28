@@ -5,17 +5,39 @@
 
   <%= render Ui::CardComponent.new do %>
     <div class="prose max-w-none text-[var(--color-muted-foreground)] space-y-6">
-      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Pedidos y devoluciones</h2>
+      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Qué es esta quiniela</h2>
       <p>
-        Los pedidos pueden ser cancelados o modificados antes de ser enviados. Una vez enviado el pedido aplican las políticas de devolución indicadas en cada producto. Para productos digitales no aplican devoluciones después de la descarga.
+        Es una quiniela amistosa entre amigos sobre la fase de eliminación de la Copa Mundial de la FIFA 2026. Consiste en predecir qué equipo avanza en cada partido y, opcionalmente, el marcador exacto para ganar puntos de bonus. Es un juego de entretenimiento entre conocidos; no estamos afiliados ni patrocinados por la FIFA ni por ninguna organización oficial.
       </p>
-      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Eventos</h2>
+
+      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Cargo de acceso (coperacha)</h2>
       <p>
-        Las inscripciones a eventos pueden cancelarse hasta antes de la fecha del evento. Consulta los detalles de cada evento para más información sobre cupos, ubicación y reembolsos.
+        Para participar se realiza un cargo único de inscripción mediante Stripe. Este cargo es exclusivamente una coperacha para cubrir el hosting y la operación de la plataforma: <strong>no es una apuesta, ni un pozo, ni un premio en efectivo</strong>. No se acumula ni se reparte entre los participantes en ningún momento.
       </p>
-      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Suscripciones</h2>
+
+      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Premio</h2>
       <p>
-        Las suscripciones se renuevan automáticamente al final de cada período de facturación. Puedes administrar o cancelar tu suscripción en cualquier momento desde la configuración de tu cuenta.
+        El premio es simbólico y se anuncia dentro de la plataforma. No tiene valor monetario garantizado ni se entrega en efectivo, y queda a criterio de la organización de la quiniela.
+      </p>
+
+      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Predicciones y cierre</h2>
+      <p>
+        Las predicciones de cada partido se cierran automáticamente al momento del silbatazo inicial (kickoff). Una vez cerrado un partido no es posible crear ni modificar predicciones. Eres responsable de registrar tus predicciones a tiempo.
+      </p>
+
+      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Puntuación y resultados</h2>
+      <p>
+        Los puntos se otorgan según la ronda del partido, con un bonus por acertar el marcador exacto. Los resultados se sincronizan desde una fuente de datos deportivos y pueden ser ajustados manualmente por la organización en caso de errores. Las decisiones de la organización sobre resultados y puntajes son finales.
+      </p>
+
+      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Reembolsos</h2>
+      <p>
+        Por la naturaleza del cargo (coperacha para el hosting), la inscripción no es reembolsable una vez que se ha confirmado el acceso al torneo, salvo error en el cobro.
+      </p>
+
+      <h2 class="text-xl font-semibold text-[var(--color-foreground)]">Cuenta y datos</h2>
+      <p>
+        Eres responsable de la seguridad de tu cuenta. Tu apodo y tu puntaje son visibles para los demás participantes en la tabla de posiciones. Usamos tus datos únicamente para operar la quiniela; los pagos son procesados por Stripe y no almacenamos los datos de tu tarjeta.
       </p>
     </div>
   <% end %>

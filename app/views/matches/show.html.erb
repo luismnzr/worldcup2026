@@ -55,7 +55,15 @@
               <span class="text-sm font-medium text-[var(--color-foreground)] truncate"><%= prediction.user.display_name_or_default %></span>
             </div>
             <div class="flex items-center gap-3 flex-shrink-0">
-              <span class="text-sm"><%= team_label(prediction.advancing_pick) %></span>
+              <div class="flex flex-col items-end">
+                <span class="text-sm"><%= team_label(prediction.advancing_pick) %></span>
+                <% if prediction.predicted_score? %>
+                  <span class="text-xs tabular-nums text-[var(--color-muted-foreground)] <%= "font-semibold text-[var(--color-success)]" if @match.status == "finished" && prediction.exact_score_hit? %>">
+                    <%= prediction.home_score %>–<%= prediction.away_score %>
+                    <% if @match.status == "finished" && prediction.exact_score_hit? %>· marcador exacto<% end %>
+                  </span>
+                <% end %>
+              </div>
               <% if @match.status == "finished" && @match.advancing_team.present? %>
                 <% if prediction.correct? %>
                   <span class="text-sm font-bold text-[var(--color-success)]">✓ +<%= prediction.points_awarded %></span>
