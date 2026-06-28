@@ -367,12 +367,12 @@ html.dark {
 .pick-option { border-color: var(--color-border); color: var(--color-foreground); }
 .pick-option:hover { background-color: var(--color-secondary); }
 .pick-option:has(input:checked) {
-  border-color: var(--color-primary);
-  background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
-  color: var(--color-primary);
+  border-color: var(--color-foreground);
+  background-color: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+  color: var(--color-foreground);
   font-weight: 600;
 }
-.pick-option:has(input:focus-visible) { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.pick-option:has(input:focus-visible) { outline: 2px solid var(--color-foreground); outline-offset: 2px; }
 
 /* Tarjeta del bracket como enlace al detalle (sin alterar el layout/conectores) */
 .tb-card-link { display: contents; color: inherit; }
