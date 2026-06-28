@@ -4,21 +4,20 @@
 <section class="relative overflow-hidden">
   <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
   <div class="relative mx-auto max-w-3xl px-4 sm:px-6 py-20 sm:py-28 text-center">
-    <p class="text-sm font-semibold uppercase tracking-widest text-white/60">Quiniela entre amigos</p>
-    <h1 class="mt-3 text-4xl sm:text-6xl font-bold tracking-tight text-white">
-      <%= current_tournament.name %>
+    <h1 class="text-4xl sm:text-6xl font-bold tracking-tight text-white">
+      World Cup 2026 Finals
     </h1>
     <p class="mt-5 text-lg text-white/80 max-w-xl mx-auto">
-      Predice quién avanza en cada partido de la eliminación directa. Los cruces se van
-      abriendo conforme se definen los equipos.
+      Predice quién avanza en cada partido. Punto extra por atinar al marcador.
+      Suma puntos y gana un premio.
     </p>
     <div class="mt-8 flex flex-wrap gap-3 justify-center">
       <% if user_signed_in? && current_entry&.paid? %>
-        <%= link_to "Hacer predicciones", predictions_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-[var(--color-primary)] bg-white rounded-lg hover:bg-gray-50 transition-colors shadow-lg" %>
+        <%= link_to "Hacer predicciones", predictions_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-black bg-white rounded-lg hover:bg-gray-50 transition-colors shadow-lg" %>
       <% elsif user_signed_in? %>
-        <%= link_to "Inscribirme (#{number_to_currency(current_tournament.entry_fee, unit: '$', precision: 0)} #{current_tournament.currency})", new_entry_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-[var(--color-primary)] bg-white rounded-lg hover:bg-gray-50 transition-colors shadow-lg" %>
+        <%= link_to "Inscribirme (#{number_to_currency(current_tournament.entry_fee, unit: '$', precision: 0)} #{current_tournament.currency})", new_entry_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-black bg-white rounded-lg hover:bg-gray-50 transition-colors shadow-lg" %>
       <% else %>
-        <%= link_to "Crear cuenta", new_user_registration_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-[var(--color-primary)] bg-white rounded-lg hover:bg-gray-50 transition-colors shadow-lg" %>
+        <%= link_to "Crear cuenta", new_user_registration_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-black bg-white rounded-lg hover:bg-gray-50 transition-colors shadow-lg" %>
         <%= link_to "Iniciar sesión", new_user_session_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-white border border-white/30 rounded-lg hover:bg-white/10 transition-colors" %>
       <% end %>
       <%= link_to "Ver partidos", bracket_path, class: "inline-flex items-center px-6 py-3 text-sm font-semibold text-white border border-white/30 rounded-lg hover:bg-white/10 transition-colors" %>
@@ -52,5 +51,26 @@
     <% else %>
       <p class="text-sm text-[var(--color-muted-foreground)]">Aún no hay partidos programados.</p>
     <% end %>
+  </section>
+
+  <%# Cómo funciona %>
+  <section>
+    <h2 class="text-lg font-semibold text-[var(--color-foreground)] mb-3">Cómo funciona</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <% [
+        [ "1", "Inscríbete", "Un pago único de acceso al torneo." ],
+        [ "2", "Predice", "Elige quién avanza en cada partido. Punto extra si atinas el marcador." ],
+        [ "3", "Suma puntos", "Las rondas más avanzadas valen más. Sigue tu posición en el leaderboard." ],
+        [ "4", "Gana", "El que más puntos acumule se lleva el premio." ]
+      ].each do |num, title, desc| %>
+        <div class="flex gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+          <span class="h-7 w-7 flex-shrink-0 rounded-full bg-[var(--color-primary)] text-[var(--color-primary-foreground)] flex items-center justify-center text-sm font-bold"><%= num %></span>
+          <div>
+            <p class="font-medium text-[var(--color-foreground)]"><%= title %></p>
+            <p class="text-sm text-[var(--color-muted-foreground)] mt-0.5"><%= desc %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
   </section>
 </div>
