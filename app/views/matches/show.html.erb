@@ -30,17 +30,7 @@
   <div>
     <h2 class="text-lg font-bold text-[var(--color-foreground)] mb-3">Predicciones</h2>
 
-    <% if !@revealed %>
-      <%= render Ui::CardComponent.new do %>
-        <div class="text-center py-6">
-          <p class="text-2xl mb-1">🔒</p>
-          <p class="text-sm font-medium text-[var(--color-foreground)]">Se revelan cuando cierre el partido</p>
-          <p class="text-xs text-[var(--color-muted-foreground)] mt-1">
-            Para que nadie copie. Ya predijeron <%= @prediction_count %> jugador<%= "es" if @prediction_count != 1 %>.
-          </p>
-        </div>
-      <% end %>
-    <% elsif @predictions.empty? %>
+    <% if @predictions.empty? %>
       <%= render Ui::CardComponent.new do %>
         <p class="text-center text-sm text-[var(--color-muted-foreground)] py-6">Nadie predijo este partido.</p>
       <% end %>
