@@ -29,6 +29,20 @@ module ApplicationHelper
     ORDER_STATUS_LABELS[status.to_s] || status.to_s.titleize
   end
 
+  # Logo de marca: usa app/assets/images/logo.png si existe; si no, cae a 🏆 en
+  # una insignia con el color de marca (para no romper si aún no subes la imagen).
+  def brand_logo?
+    Rails.root.join("app/assets/images/logo.png").exist?
+  end
+
+  def brand_mark(box: "h-8 w-8", emoji: "text-xl", wrapper: "bg-[var(--color-primary)]")
+    if brand_logo?
+      image_tag("logo.png", alt: StudioSetting.get("studio_name"), class: "#{box} rounded-lg object-contain")
+    else
+      content_tag(:div, "🏆", class: "#{box} rounded-lg #{wrapper} flex items-center justify-center #{emoji}")
+    end
+  end
+
   # Bandera (emoji) de un equipo si lo reconocemos. nil para etiquetas como "2A".
   def flag_emoji(name)
     CountryFlags.emoji(name)

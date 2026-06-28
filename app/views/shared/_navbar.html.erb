@@ -4,9 +4,7 @@
       <!-- Logo -->
       <div class="flex items-center gap-10">
         <%= link_to root_path, class: "flex items-center gap-2" do %>
-          <div class="h-8 w-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center">
-            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          </div>
+          <%= brand_mark(box: "h-8 w-8", emoji: "text-xl") %>
           <span class="text-xl font-bold text-[var(--color-foreground)]"><%= StudioSetting.get("studio_name") %></span>
         <% end %>
 

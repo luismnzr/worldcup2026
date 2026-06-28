@@ -5,11 +5,12 @@
   --color-warm-gold: #a3946b;
   --color-parchment: #e8e4de;
   --color-bone: #f5f2ec;
+  --color-wc-red: rgb(195, 41, 28);
 
   /* Semantic colors — light mode */
-  --color-primary: var(--color-warm-gold);
-  --color-primary-foreground: var(--color-obsidian);
-  --color-primary-hover: #8f8158;
+  --color-primary: var(--color-wc-red);
+  --color-primary-foreground: #ffffff;
+  --color-primary-hover: #a3211a;
   --color-secondary: var(--color-parchment);
   --color-secondary-foreground: var(--color-obsidian);
   --color-accent: var(--color-warm-gold);
@@ -52,9 +53,9 @@
 
 /* Dark mode — applied when <html> has the `dark` class */
 .dark {
-  --color-primary: var(--color-warm-gold);
-  --color-primary-foreground: var(--color-obsidian);
-  --color-primary-hover: #b8a77d;
+  --color-primary: #d83b2e;
+  --color-primary-foreground: #ffffff;
+  --color-primary-hover: #e85c50;
   --color-secondary: var(--color-charcoal);
   --color-secondary-foreground: var(--color-bone);
   --color-accent: var(--color-warm-gold);
