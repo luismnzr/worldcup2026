@@ -1,6 +1,6 @@
 <footer class="bg-[var(--color-footer)] text-[var(--color-footer-foreground)]" data-theme-static>
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 lg:py-16">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-8 py-12 lg:py-16">
       <!-- Brand -->
       <div class="col-span-2 md:col-span-1">
         <div class="flex items-center gap-2 mb-4">
@@ -10,32 +10,22 @@
         <p class="text-sm text-gray-400 max-w-xs">28 Junio — 19 Julio</p>
       </div>
 
-      <!-- Quick Links -->
+      <!-- Menú -->
       <div>
-        <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">Explora</h4>
+        <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">Menú</h4>
         <nav class="space-y-3">
-          <%= link_to "Tienda", products_path, class: "block text-sm text-gray-300 hover:text-white transition-colors" %>
-          <%= link_to "Eventos", events_path, class: "block text-sm text-gray-300 hover:text-white transition-colors" %>
-          <%= link_to "Membresía", subscription_plans_path, class: "block text-sm text-gray-300 hover:text-white transition-colors" %>
-          <%= link_to "Miembros", member_posts_path, class: "block text-sm text-gray-300 hover:text-white transition-colors" %>
-          <%= link_to "Nosotros", about_path, class: "block text-sm text-gray-300 hover:text-white transition-colors" %>
+          <%= link_to "Mis Predicciones", predictions_path, class: "block text-sm text-gray-300 hover:text-white transition-colors" %>
+          <%= link_to "Leaderboard", leaderboard_path, class: "block text-sm text-gray-300 hover:text-white transition-colors" %>
+          <%= link_to "Partidos", bracket_path, class: "block text-sm text-gray-300 hover:text-white transition-colors" %>
         </nav>
       </div>
 
-      <!-- Support -->
+      <!-- Soporte -->
       <div>
         <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">Soporte</h4>
         <nav class="space-y-3">
           <%= link_to "Términos", terms_path, class: "block text-sm text-gray-300 hover:text-white transition-colors" %>
-          <span class="block text-sm text-gray-300"><%= StudioSetting.get("studio_email") %></span>
-          <span class="block text-sm text-gray-300"><%= StudioSetting.get("studio_phone") %></span>
         </nav>
-      </div>
-
-      <!-- Location -->
-      <div>
-        <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">Ubicación</h4>
-        <p class="text-sm text-gray-300"><%= StudioSetting.get("studio_address") %></p>
       </div>
     </div>
 
