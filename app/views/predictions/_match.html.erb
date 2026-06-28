@@ -10,8 +10,7 @@
     <p class="text-xs font-medium text-[var(--color-muted-foreground)]">¿Quién avanza?</p>
     <div class="grid grid-cols-2 gap-2">
       <% [ match.home_team, match.away_team ].each do |team| %>
-        <label class="flex items-center justify-center gap-2 cursor-pointer rounded-[var(--radius-md)] border px-3 py-2.5 text-sm font-medium transition-colors
-                      <%= prediction.advancing_pick == team ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]' : 'border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-secondary)]' %>">
+        <label class="pick-option flex items-center justify-center gap-2 cursor-pointer rounded-[var(--radius-md)] border px-3 py-2.5 text-sm font-medium transition-colors">
           <%= radio_button_tag "prediction[advancing_pick]", team, prediction.advancing_pick == team, class: "sr-only", id: "pick_#{match.id}_#{team.parameterize}" %>
           <%= team_label(team) %>
         </label>

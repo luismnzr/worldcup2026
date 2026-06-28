@@ -353,3 +353,14 @@ html.dark {
 .tb-card-pick { flex-shrink: 0; white-space: nowrap; color: var(--color-muted-foreground); }
 .tb-card-pick--hit { color: var(--color-success); font-weight: 700; }
 .tb-card-pick--miss { color: var(--color-destructive); }
+
+/* Predicciones: opción de pick con estado "seleccionado" inmediato (sin JS) */
+.pick-option { border-color: var(--color-border); color: var(--color-foreground); }
+.pick-option:hover { background-color: var(--color-secondary); }
+.pick-option:has(input:checked) {
+  border-color: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.pick-option:has(input:focus-visible) { outline: 2px solid var(--color-primary); outline-offset: 2px; }
