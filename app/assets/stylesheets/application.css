@@ -378,3 +378,13 @@ html.dark {
 .tb-card-link { display: contents; color: inherit; }
 .tb-card-link .tb-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
 .tb-card-link:hover .tb-card { border-color: var(--color-primary); box-shadow: var(--shadow-md); }
+
+/* iOS Safari hace zoom al enfocar un input con font-size < 16px. Forzamos 16px
+   en los campos de formulario en móvil para evitarlo (sin tocar el pinch-zoom). */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
