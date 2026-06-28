@@ -24,18 +24,21 @@ class ResultsSyncService
 
       assign_external_ids(fixtures)
 
-      newly_finished = []
+      # La API es la fuente de verdad: re-aplica a TODOS los partidos en cada
+      # sync (con detección de cambios). Si un resultado finalizado cambió,
+      # recalcula sus puntos.
+      rescore = []
       fixtures.each do |fx|
         match = Match.find_by(external_id: fx.external_id)
         next unless match
-        next if match.status == "finished" # ya cerrado: no se pisa
 
-        changed_to_finished = apply!(match, fx, summary)
-        newly_finished << match if changed_to_finished
+        if apply!(match, fx, summary) # devuelve true si cambió y quedó finalizado con avance
+          rescore << match
+        end
       end
 
-      newly_finished.each { |m| MatchResultService.rescore(m) }
-      LeaderboardService.broadcast(Tournament.current) if newly_finished.any?
+      rescore.each { |m| MatchResultService.rescore(m) }
+      LeaderboardService.broadcast(Tournament.current) if rescore.any?
       summary
     end
 
@@ -77,6 +80,8 @@ class ResultsSyncService
       end
     end
 
+    # Aplica el fixture al partido. Solo guarda si algo cambió. Devuelve true si
+    # tras el cambio quedó finalizado con equipo que avanza (para recalcular).
     def apply!(match, fx, summary)
       match.kickoff_at = fx.kickoff if fx.kickoff
       match.home_team = fx.home if fx.home.present?
@@ -85,16 +90,17 @@ class ResultsSyncService
       match.home_score = fx.fh
       match.away_score = fx.fa
 
-      finishing = false
       if fx.status == "finished" && %w[HOME_TEAM AWAY_TEAM].include?(fx.winner)
         match.advancing_team = fx.winner == "HOME_TEAM" ? match.home_team : match.away_team
-        finishing = match.advancing_team.present?
       end
 
-      match.save!
-      (match.home_team.present? && match.away_team.present?) ? summary.filled << match.number : summary.unresolved << match.number
-      summary.applied << match.number if finishing
-      finishing
+      changed = match.changed?
+      match.save! if changed
+
+      summary.filled << match.number if match.home_team.present? && match.away_team.present?
+      finished_with_winner = match.status == "finished" && match.advancing_team.present?
+      summary.applied << match.number if changed && finished_with_winner
+      changed && finished_with_winner
     end
 
     def resolve_name(raw)

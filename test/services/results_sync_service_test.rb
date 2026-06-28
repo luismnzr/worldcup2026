@@ -72,18 +72,21 @@ class ResultsSyncServiceTest < ActiveSupport::TestCase
     assert_equal 3, match.away_score
   end
 
-  test "does not clobber a match already finished" do
+  test "re-applies finished matches from the API (API is the source of truth)" do
     match = create(:match, :finished, number: 73, stage: "r32", external_id: 100,
                    home_team: "México", away_team: "Argentina", advancing_team: "México",
                    home_score: 5, away_score: 0)
 
+    # La API corrige el resultado: ahora avanza Argentina 0-1.
     ResultsSyncService.call({ "matches" => [
       fx(id: 100, date: "2026-06-28T19:00:00Z", home: "Mexico", away: "Argentina",
-         status: "FINISHED", winner: "AWAY_TEAM", fh: 1, fa: 0)
+         status: "FINISHED", winner: "AWAY_TEAM", fh: 0, fa: 1)
     ] })
 
-    assert_equal 5, match.reload.home_score
-    assert_equal "México", match.advancing_team
+    match.reload
+    assert_equal 0, match.home_score
+    assert_equal 1, match.away_score
+    assert_equal "Argentina", match.advancing_team
   end
 
   test "ignores group-stage fixtures" do
