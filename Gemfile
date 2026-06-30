@@ -77,7 +77,7 @@ end
 
 gem "dotenv-rails", "~> 3.2", groups: [ :development, :test ]
 
-gem "sidekiq-cron", "~> 2.3"
+gem "sidekiq-cron", "~> 2.4"
 gem "postmark-rails"
 gem "aws-sdk-s3", require: false
 gem "rack-attack"
